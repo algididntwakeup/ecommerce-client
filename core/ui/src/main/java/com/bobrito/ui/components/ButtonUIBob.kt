@@ -30,7 +30,7 @@ fun BobButtonPrimary(
             .fillMaxWidth()
             .padding(16.dp)
             .height(56.dp),
-        color = ButtonDefaults.buttonColors( // Parameter name benar: "color"
+        color = ButtonDefaults.buttonColors(
             containerColor = LightOrange,
             contentColor = AbuMonyetGelap
         )
@@ -41,17 +41,14 @@ fun BobButtonPrimary(
 fun BobButtonFacebook(
     text: String = "Facebook",
     onClick: () -> Unit = {},
-    modifier: Modifier = Modifier
-        .fillMaxWidth()
-        .padding(16.dp)
-        .height(56.dp)
+    modifier: Modifier = Modifier // Hapus default modifier yang ada padding
 ) {
     BobwIconBaseButton(
         text = text,
         onClick = onClick,
         enabled = true,
         modifier = modifier,
-        buttonColors = ButtonDefaults.buttonColors( // Parameter name benar: "buttonColors"
+        buttonColors = ButtonDefaults.buttonColors(
             containerColor = BiruFesbuk,
             contentColor = Color.White
         ),
@@ -64,17 +61,14 @@ fun BobButtonFacebook(
 fun BobButtonGoogle(
     text: String = "Google",
     onClick: () -> Unit = {},
-    modifier: Modifier = Modifier
-        .fillMaxWidth()
-        .padding(16.dp)
-        .height(56.dp),
+    modifier: Modifier = Modifier // Hapus default modifier yang ada padding
 ) {
     BobwIconBaseButton(
         text = text,
         onClick = onClick,
         enabled = true,
         modifier = modifier,
-        buttonColors = ButtonDefaults.buttonColors( // Parameter name benar: "buttonColors" reffering dr baseuibob
+        buttonColors = ButtonDefaults.buttonColors(
             containerColor = OrenGoogle,
             contentColor = Color.White
         ),
@@ -87,53 +81,51 @@ fun BobButtonGoogle(
 fun BobButtonSocmedRow(
     onClickGoogle: () -> Unit = {},
     onClickFacebook: () -> Unit = {},
-    modifier: Modifier = Modifier.fillMaxWidth()
-        .padding(16.dp)
-){
-    Row (
-        modifier = modifier,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp), // Padding cuma di sini aja
         horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ){
-
+    ) {
         BobButtonGoogle(
             modifier = Modifier
                 .height(56.dp)
-                .weight(1f),
+                .weight(1f), // Gak ada padding lagi
             onClick = onClickGoogle
         )
 
         BobButtonFacebook(
             modifier = Modifier
                 .height(56.dp)
-                .weight(1f),
+                .weight(1f), // Gak ada padding lagi
             onClick = onClickFacebook
         )
     }
 }
 
-//Kompilasi Preview
-
-@Preview()
+// Kompilasi Preview
+@Preview(showBackground = true)
 @Composable
 fun BobButtonPrimaryPreview() {
     BobButtonPrimary()
 }
 
-@Preview()
+@Preview(showBackground = true)
 @Composable
 fun BobButtonFacebookPreview() {
     BobButtonFacebook()
 }
 
-@Preview()
+@Preview(showBackground = true)
 @Composable
-fun BobButtongGooglePreview() {
+fun BobButtonGooglePreview() {
     BobButtonGoogle()
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun BobButtonSocmedRowPreview(){
+fun BobButtonSocmedRowPreview() {
     BobButtonSocmedRow()
 }
-

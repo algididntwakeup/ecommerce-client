@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -22,11 +24,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.bobrito.ui.theme.HijauBetawi
 import com.bobrito.ui.theme.VividMagenta
+
 
 @Composable
 fun BobTextHeader(
@@ -78,7 +81,7 @@ fun BobTextRegularwClick(
             style = SpanStyle(
                 color = clickableColor,
                 fontWeight = FontWeight.Bold,
-                textDecoration = TextDecoration.Underline
+
             )
         ) {
             append(textClick)
@@ -132,32 +135,44 @@ fun BobTextRegular(
     )
 }
 
+// Di BobTextViewRow component
 @Composable
 fun BobTextViewRow(
     checked: Boolean = true,
     onCheckedChange: (Boolean) -> Unit = {},
     onTextClick: () -> Unit = {},
     textLeft: String = "Remember Me",
-    textRight: String = "Forgot Password?"
+    textRight: String = "Forgot Password?",
+    modifier: Modifier = Modifier // Tambah parameter modifier
 ) {
     val layoutResult = remember { mutableStateOf<TextLayoutResult?>(null) }
 
     Row(
-        modifier = Modifier
-            .padding(16.dp)
+        modifier = modifier // Pakai parameter modifier, hapus internal padding
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         // Checkbox dengan label "Remember Me"
-        Checkbob(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            label = textLeft,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+                colors = CheckboxDefaults.colors(
+                    checkedColor = HijauBetawi,
+                    uncheckedColor = HijauBetawi.copy(alpha = 0.6f)
+                )
+            )
+            Text(
+                text = textLeft,
+                modifier = Modifier.padding(start = 4.dp),
+                style = TextStyle(fontSize = 14.sp)
+            )
+        }
 
-        // Clickable text "Forgot password?" - Pakai cara baru yang proper
+        // Clickable text "Forgot password?"
         val annotatedString = buildAnnotatedString {
             pushStringAnnotation(
                 tag = "FORGOT_PASSWORD",
@@ -178,7 +193,6 @@ fun BobTextViewRow(
         Text(
             text = annotatedString,
             modifier = Modifier
-                .padding(8.dp)
                 .pointerInput(Unit) {
                     detectTapGestures { offset ->
                         layoutResult.value?.let { layout ->
@@ -196,16 +210,17 @@ fun BobTextViewRow(
             style = TextStyle(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Normal,
-                lineHeight = 14.sp,
-                textAlign = TextAlign.Left
+                lineHeight = 12.sp
             ),
             onTextLayout = { layoutResult.value = it }
         )
     }
 }
 
+
+
 // Previews
-@Preview(device = Devices.PIXEL, showSystemUi = true)
+@Preview()
 @Composable
 fun BobTextHeaderPreview() {
     BobTextHeader(
