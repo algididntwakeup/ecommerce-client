@@ -1,11 +1,15 @@
 package com.bobrito.ui.components
 
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -37,7 +41,7 @@ fun BobTextHeader(
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             lineHeight = 24.sp,
-            color = color, // Fix: pakai parameter color, bukan hardcode
+            color = color,
             textAlign = TextAlign.Left
         ),
         overflow = TextOverflow.Ellipsis,
@@ -74,7 +78,7 @@ fun BobTextRegularwClick(
             style = SpanStyle(
                 color = clickableColor,
                 fontWeight = FontWeight.Bold,
-                textDecoration = TextDecoration.Underline // Biar keliatan clickable
+                textDecoration = TextDecoration.Underline
             )
         ) {
             append(textClick)
@@ -109,6 +113,98 @@ fun BobTextRegularwClick(
     )
 }
 
+@Composable
+fun BobTextRegular(
+    text: String = "E-mail",
+    modifier: Modifier = Modifier.padding(16.dp),
+    color: Color = Color.Black
+) {
+    Text(
+        text = text,
+        modifier = modifier,
+        style = TextStyle(
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Normal,
+            lineHeight = 16.sp,
+            textAlign = TextAlign.Left
+        ),
+        color = color
+    )
+}
+
+@Composable
+fun BobTextViewRow(
+    checked: Boolean = true,
+    onCheckedChange: (Boolean) -> Unit = {},
+    onTextClick: () -> Unit = {},
+    textLeft: String = "Remember Me",
+    textRight: String = "Forgot Password?"
+) {
+    val layoutResult = remember { mutableStateOf<TextLayoutResult?>(null) }
+
+    Row(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        // Checkbox dengan label "Remember Me"
+        Checkbob(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            label = textLeft,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+
+        // Clickable text "Forgot password?" - Pakai cara baru yang proper
+        val annotatedString = buildAnnotatedString {
+            pushStringAnnotation(
+                tag = "FORGOT_PASSWORD",
+                annotation = "forgot_password_click"
+            )
+            withStyle(
+                style = SpanStyle(
+                    color = VividMagenta,
+                    fontWeight = FontWeight.Medium,
+                    textDecoration = TextDecoration.Underline
+                )
+            ) {
+                append(textRight)
+            }
+            pop()
+        }
+
+        Text(
+            text = annotatedString,
+            modifier = Modifier
+                .padding(8.dp)
+                .pointerInput(Unit) {
+                    detectTapGestures { offset ->
+                        layoutResult.value?.let { layout ->
+                            val position = layout.getOffsetForPosition(offset)
+                            annotatedString.getStringAnnotations(
+                                tag = "FORGOT_PASSWORD",
+                                start = position,
+                                end = position
+                            ).firstOrNull()?.let {
+                                onTextClick()
+                            }
+                        }
+                    }
+                },
+            style = TextStyle(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Normal,
+                lineHeight = 14.sp,
+                textAlign = TextAlign.Left
+            ),
+            onTextLayout = { layoutResult.value = it }
+        )
+    }
+}
+
+// Previews
 @Preview(device = Devices.PIXEL, showSystemUi = true)
 @Composable
 fun BobTextHeaderPreview() {
@@ -129,27 +225,18 @@ fun BobTextRegularwClickPreview() {
     )
 }
 
+@Preview(showBackground = true)
 @Composable
-fun BobTextRegular(
-    text: String = "E-mail",
-    modifier : Modifier = Modifier.padding(16.dp),
-    color: Color = Color.Black
-){
-Text(
-    text = text,
-    modifier = modifier,
-    style = TextStyle(
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Normal,
-            lineHeight = 16.sp,
-            textAlign = TextAlign.Left
-    ),
-    color = color
-)
+fun BobTextRegularPreview() {
+    BobTextRegular()
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun BobTextRegularPreview(){
- BobTextRegular()
+fun BobTextViewRowPreview() {
+    BobTextViewRow(
+        onTextClick = {
+            println("Forgot password clicked!")
+        }
+    )
 }
