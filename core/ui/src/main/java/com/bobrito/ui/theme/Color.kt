@@ -1,4 +1,4 @@
-package com.bobrito.shoecommerce.ui.theme
+package com.bobrito.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
