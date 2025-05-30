@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.bobrito.ui.theme.VividMagenta
 
 @Composable
 fun BobTextHeader(
@@ -56,7 +57,7 @@ fun BobTextRegularwClick(
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier.padding(16.dp),
     textColor: Color = Color.Black,
-    clickableColor: Color = Color.Blue
+    clickableColor: Color = VividMagenta
 ) {
     val layoutResult = remember { mutableStateOf<TextLayoutResult?>(null) }
 
@@ -126,4 +127,29 @@ fun BobTextRegularwClickPreview() {
             println("Sign Up clicked!")
         }
     )
+}
+
+@Composable
+fun BobTextRegular(
+    text: String = "E-mail",
+    modifier : Modifier = Modifier.padding(16.dp),
+    color: Color = Color.Black
+){
+Text(
+    text = text,
+    modifier = modifier,
+    style = TextStyle(
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Normal,
+            lineHeight = 16.sp,
+            textAlign = TextAlign.Left
+    ),
+    color = color
+)
+}
+
+@Preview
+@Composable
+fun BobTextRegularPreview(){
+ BobTextRegular()
 }
