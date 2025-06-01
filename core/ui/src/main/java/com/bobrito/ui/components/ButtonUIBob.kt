@@ -41,7 +41,10 @@ fun BobButtonPrimary(
 fun BobButtonFacebook(
     text: String = "Facebook",
     onClick: () -> Unit = {},
-    modifier: Modifier = Modifier // Hapus default modifier yang ada padding
+    modifier: Modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp)
+        .height(56.dp)
 ) {
     BobwIconBaseButton(
         text = text,
@@ -59,9 +62,13 @@ fun BobButtonFacebook(
 
 @Composable
 fun BobButtonGoogle(
+
     text: String = "Google",
     onClick: () -> Unit = {},
-    modifier: Modifier = Modifier // Hapus default modifier yang ada padding
+    modifier : Modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp)
+        .height(56.dp)
 ) {
     BobwIconBaseButton(
         text = text,
@@ -81,50 +88,50 @@ fun BobButtonGoogle(
 fun BobButtonSocmedRow(
     onClickGoogle: () -> Unit = {},
     onClickFacebook: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier.fillMaxWidth()
+        .padding(16.dp),
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp), // Padding cuma di sini aja
+        modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+
         BobButtonGoogle(
             modifier = Modifier
                 .height(56.dp)
-                .weight(1f), // Gak ada padding lagi
+                .weight(1f),
             onClick = onClickGoogle
         )
 
         BobButtonFacebook(
             modifier = Modifier
                 .height(56.dp)
-                .weight(1f), // Gak ada padding lagi
+                .weight(1f),
             onClick = onClickFacebook
         )
     }
 }
 
 // Kompilasi Preview
-@Preview(showBackground = true)
+@Preview()
 @Composable
 fun BobButtonPrimaryPreview() {
     BobButtonPrimary()
 }
 
-@Preview(showBackground = true)
+@Preview()
 @Composable
 fun BobButtonFacebookPreview() {
     BobButtonFacebook()
 }
 
-@Preview(showBackground = true)
+@Preview()
 @Composable
 fun BobButtonGooglePreview() {
     BobButtonGoogle()
 }
 
-@Preview(showBackground = true)
+@Preview()
 @Composable
 fun BobButtonSocmedRowPreview() {
     BobButtonSocmedRow()

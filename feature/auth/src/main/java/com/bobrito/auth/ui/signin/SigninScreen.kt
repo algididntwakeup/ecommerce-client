@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bobrito.ui.components.BobButtonPrimary
+import com.bobrito.ui.components.BobButtonSocmedRow
 import com.bobrito.ui.components.BobEditText
 import com.bobrito.ui.components.BobImageViewClick
 import com.bobrito.ui.components.BobTextHeader
@@ -83,6 +84,10 @@ fun SigninScreen(
 
         BobButtonPrimary()
 
+        BobButtonSocmedRow(
+            onClickFacebook = {},
+            onClickGoogle = {},
+        )
 
 
 

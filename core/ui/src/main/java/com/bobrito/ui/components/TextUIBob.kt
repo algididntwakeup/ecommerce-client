@@ -138,7 +138,7 @@ fun BobTextRegular(
 // Di BobTextViewRow component
 @Composable
 fun BobTextViewRow(
-    checked: Boolean = true,
+    checked: Boolean = false,
     onCheckedChange: (Boolean) -> Unit = {},
     onTextClick: () -> Unit = {},
     textLeft: String = "Remember Me",
