@@ -7,10 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -18,6 +15,12 @@ import com.bobrito.auth.ui.signin.SigninScreen
 import com.bobrito.auth.ui.signup.SignupScreen
 
 class MainActivity : ComponentActivity() {
+
+    sealed class  Screen(val route: String) {
+        object AuthSignin : Screen("auth/signin")
+        object AuthSignup : Screen("auth/signup")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -28,14 +31,18 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NavHost(
                         navController = navController,
-                        startDestination = "signin",
+                        startDestination = Screen.AuthSignin.route,
                         modifier = Modifier.padding(innerPadding)
                     ) {
-                        composable("signin") {
-                            SigninScreen()
+                        composable(Screen.AuthSignin.route) {
+                            SigninScreen(
+                                navController = navController
+                            )
                         }
-                        composable("signup") {
-                            SignupScreen()
+                        composable(Screen.AuthSignup.route) {
+                            SignupScreen(
+                                navController = navController
+                            )
                         }
                     }
                 }
@@ -44,18 +51,3 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Ciao $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    com.bobrito.ui.theme.ShoecommerceappTheme {
-        Greeting("Android")
-    }
-}

@@ -21,7 +21,7 @@ fun BobImageViewClick(
     modifier: Modifier = Modifier.size(24.dp)
 ) {
     // isi composable di sini
-    IconButton(onClick = { onClick }) {
+    IconButton(onClick = { onClick() }) {
         Icon(
             imageVector = imageVector,
             contentDescription = imageDescription,

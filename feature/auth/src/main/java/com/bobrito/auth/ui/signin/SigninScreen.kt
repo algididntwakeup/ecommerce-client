@@ -13,6 +13,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.bobrito.auth.MainActivity
 import com.bobrito.ui.components.BobButtonPrimary
 import com.bobrito.ui.components.BobButtonSocmedRow
 import com.bobrito.ui.components.BobEditText
@@ -25,7 +28,7 @@ import com.bobrito.ui.components.BobTextViewRow
 
 @Composable
 fun SigninScreen(
-
+    navController: NavController = rememberNavController()
 ) {
 
     Column (
@@ -52,7 +55,7 @@ fun SigninScreen(
             textClick = "Sign Up",
             modifier = Modifier.padding(horizontal = 16.dp),
             onClick = {
-
+                navController.navigate(MainActivity.Screen.AuthSignup.route)
             }
         )
         Spacer(modifier = Modifier.height(25.dp))

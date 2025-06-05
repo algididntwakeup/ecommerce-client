@@ -13,6 +13,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.bobrito.ui.components.BobButtonPrimary
 import com.bobrito.ui.components.BobEditText
 import com.bobrito.ui.components.BobImageViewClick
@@ -23,7 +25,7 @@ import com.bobrito.ui.components.BobTextRegularwClick
 
 @Composable
 fun SignupScreen(
-
+    navController: NavController = rememberNavController()
 ) {
 
     Column(
@@ -32,7 +34,11 @@ fun SignupScreen(
             .padding(vertical = 16.dp)
             .background(Color.White)
     ) {
-        BobImageViewClick(       )
+        BobImageViewClick(
+            onClick = {
+                navController.popBackStack()
+            }
+        )
 
         Spacer(modifier = Modifier.height(30.dp))
 
@@ -47,6 +53,9 @@ fun SignupScreen(
             text = "Do you already have account ?",
             textClick = " Sign In",
             modifier = Modifier.padding(horizontal = 16.dp),
+            onClick = {
+                navController.popBackStack()
+            }
 
         )
 
