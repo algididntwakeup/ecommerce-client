@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -30,6 +31,13 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    buildFeatures {
+        compose = true
+    }
+    // Hapus composeOptions karena udah pakai compose.compiler plugin
+    // composeOptions {
+    //     kotlinCompilerExtensionVersion = "1.5.1"
+    // }
 }
 
 dependencies {
@@ -44,12 +52,12 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.appcompat)
-
-    // Fix Hilt Navigation Compose - pakai versi yang benar
+    implementation("androidx.compose.material:material-android:1.8.2")
+    // Hilt Navigation Compose
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    implementation(libs.androidx.compose.material3)
-
+    implementation("androidx.navigation:navigation-compose:2.9.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    debugImplementation(libs.ui.tooling)
 }
