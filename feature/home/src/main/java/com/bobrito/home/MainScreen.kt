@@ -25,8 +25,9 @@ import androidx.navigation.compose.rememberNavController
 import com.bobrito.home.ui.AccountScreens
 import com.bobrito.home.ui.BottomNavItem
 import com.bobrito.home.ui.OrderScreens
-import com.bobrito.home.ui.ProductScreens
+//import com.bobrito.home.ui.ProductScreens
 import com.bobrito.home.ui.home.HomeScreen
+import com.bobrito.home.ui.product.ProductScreens
 import com.bobrito.ui.theme.AbuMonyetGelap
 
 @Composable
