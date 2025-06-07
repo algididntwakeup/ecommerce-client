@@ -1,4 +1,4 @@
-package com.bobrito.home.ui
+package com.bobrito.home
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
@@ -22,6 +22,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.bobrito.home.ui.AccountScreens
+import com.bobrito.home.ui.BottomNavItem
+import com.bobrito.home.ui.OrderScreens
+import com.bobrito.home.ui.ProductScreens
+import com.bobrito.home.ui.home.HomeScreen
 import com.bobrito.ui.theme.AbuMonyetGelap
 
 @Composable
@@ -97,7 +102,7 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier){
         startDestination = BottomNavItem.Home.route,
         modifier = modifier
     ) {
-        composable(BottomNavItem.Home.route) { HomeScreens() }
+        composable(BottomNavItem.Home.route) { HomeScreen() }
         composable(BottomNavItem.Product.route) { ProductScreens() }
         composable(BottomNavItem.Order.route) { OrderScreens() }
         composable(BottomNavItem.Account.route) { AccountScreens() }

@@ -14,13 +14,12 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun BobImageViewClick(
-    onClick:() -> Unit = {},
+    onClick: () -> Unit = {},
     color: Color = Color.Black,
     imageVector: ImageVector = Icons.AutoMirrored.Filled.ArrowBack,
     imageDescription: String = "Back",
     modifier: Modifier = Modifier.size(24.dp)
 ) {
-    // isi composable di sini
     IconButton(onClick = { onClick() }) {
         Icon(
             imageVector = imageVector,
@@ -30,6 +29,7 @@ fun BobImageViewClick(
         )
     }
 }
+
 @Preview
 @Composable
 fun BobImageViewClickPreview(){

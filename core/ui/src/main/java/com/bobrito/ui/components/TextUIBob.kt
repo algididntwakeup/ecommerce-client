@@ -134,7 +134,6 @@ fun BobTextRegular(
         color = color
     )
 }
-
 // Di BobTextViewRow component
 @Composable
 fun BobTextViewRow(

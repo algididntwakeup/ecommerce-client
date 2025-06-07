@@ -2,10 +2,6 @@ package com.bobrito.home.ui
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 
-@Composable
-fun HomeScreens () {
-    ScreenContent(title="Home")
-}
 
 @Composable
 fun ProductScreens () {
