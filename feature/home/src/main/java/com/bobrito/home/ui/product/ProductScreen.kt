@@ -75,7 +75,7 @@ fun JelloTextRegular(
     modifier: Modifier = Modifier
 ) {
     Text(
-        text = "E-Mail",
+        text = "Cari Barang Kamu Disini",
         modifier = modifier
     )
 }
