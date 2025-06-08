@@ -47,12 +47,23 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.bobrito.home.ui.product.ProductDetailScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductScreens() {
     val showBottomSheet = remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
+    var showDetail by remember { mutableStateOf(false) }
+
+    if (showDetail) {
+        ProductDetailScreen(
+            onBack = { showDetail = false }
+        )
+        return
+    }
 
     Column(
         modifier = Modifier
@@ -130,7 +141,9 @@ fun ProductScreens() {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(6) { // Display 6 dummy product cards
-                ProductCard() // Create this Composable next
+                ProductCard(
+                    onClick = { showDetail = true }
+                )
             }
         }
     }
@@ -169,11 +182,13 @@ fun JelloImageViewClick(
 }
 
 @Composable
-fun ProductCard() {
+fun ProductCard(
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* Handle product card click */ },
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
