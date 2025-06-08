@@ -37,6 +37,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.ui.draw.clip
+import com.bobrito.home.ui.cart.CartScreen
+import com.bobrito.home.ui.checkout.CheckoutScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,200 +61,240 @@ fun ProductDetailScreen(
     var optionType by remember { mutableStateOf("") } // "buy" or "cart"
     val sheetState = rememberModalBottomSheetState()
     var showDescriptionScreen by remember { mutableStateOf(false) }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF5F5F5))
-            .padding(8.dp)
-    ) {
-        // Image & Top Bar
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White)
-                .padding(8.dp)
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back",
-                        modifier = Modifier
-                            .clickable { onBack() }
-                            .padding(8.dp)
-                    )
-                    Row {
-                        Icon(
-                            imageVector = Icons.Default.FavoriteBorder,
-                            contentDescription = "Favorite",
-                            modifier = Modifier.padding(8.dp)
-                        )
-                        Icon(
-                            imageVector = Icons.Default.Share,
-                            contentDescription = "Share",
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
-                }
-                BobImageViewProductDetail(
-                    url = productImage,
-                    description = "Product Image"
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        // Product Name
-        Text(
-            text = productName,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            modifier = Modifier.padding(horizontal = 8.dp)
-        )
-        // Rating & Review
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-        ) {
-            repeat(rating) {
-                Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = "Star",
-                    tint = Color(0xFFFFD700),
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-            Text(
-                text = "  SEE REVIEW",
-                color = Color(0xFFFF9800),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 4.dp)
-            )
-        }
-        // Price
-        Text(
-            text = productPrice,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
-            color = Color.Black,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-        )
-        // Description Button
-        if (showDescriptionScreen) {
-            ProductDescriptionScreen(
-                description = productDescription,
-                onBack = { showDescriptionScreen = false }
-            )
-            return
-        }
-        OutlinedButton(
-            onClick = { showDescriptionScreen = true },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-        ) {
-            Text("See Description")
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        // Related Product
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "RELATED PRODUCT",
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp
-            )
-            Text(
-                text = "SEE ALL",
-                color = Color(0xFFFF9800),
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp
-            )
-        }
-        LazyRow(
-            modifier = Modifier.padding(vertical = 8.dp)
-        ) {
-            items(relatedProducts) { (name, price) ->
-                Card(
+    var currentScreen by remember { mutableStateOf("detail") } // "detail", "cart", "checkout"
+
+    when (currentScreen) {
+        "detail" -> {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFFF5F5F5))
+                    .padding(8.dp)
+            ) {
+                // Image & Top Bar
+                Box(
                     modifier = Modifier
-                        .width(120.dp)
-                        .padding(horizontal = 4.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                        .fillMaxWidth()
+                        .background(Color.White)
+                        .padding(8.dp)
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(8.dp)
-                    ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Back",
+                                modifier = Modifier
+                                    .clickable { onBack() }
+                                    .padding(8.dp)
+                            )
+                            Row {
+                                Icon(
+                                    imageVector = Icons.Default.FavoriteBorder,
+                                    contentDescription = "Favorite",
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.Share,
+                                    contentDescription = "Share",
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                            }
+                        }
                         BobImageViewProductDetail(
                             url = productImage,
-                            description = "Related Product"
-                        )
-                        Text(
-                            text = name,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                        Text(
-                            text = price,
-                            fontSize = 12.sp,
-                            color = Color.Gray
+                            description = "Product Image"
                         )
                     }
                 }
+                Spacer(modifier = Modifier.height(8.dp))
+                // Product Name
+                Text(
+                    text = productName,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+                // Rating & Review
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                ) {
+                    repeat(rating) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Star",
+                            tint = Color(0xFFFFD700),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    Text(
+                        text = "  SEE REVIEW",
+                        color = Color(0xFFFF9800),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                }
+                // Price
+                Text(
+                    text = productPrice,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = Color.Black,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                )
+                // Description Button
+                if (showDescriptionScreen) {
+                    ProductDescriptionScreen(
+                        description = productDescription,
+                        onBack = { showDescriptionScreen = false }
+                    )
+                    return
+                }
+                OutlinedButton(
+                    onClick = { showDescriptionScreen = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp)
+                ) {
+                    Text("See Description")
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                // Related Product
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "RELATED PRODUCT",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                    Text(
+                        text = "SEE ALL",
+                        color = Color(0xFFFF9800),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp
+                    )
+                }
+                LazyRow(
+                    modifier = Modifier.padding(vertical = 8.dp)
+                ) {
+                    items(relatedProducts) { (name, price) ->
+                        Card(
+                            modifier = Modifier
+                                .width(120.dp)
+                                .padding(horizontal = 4.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.padding(8.dp)
+                            ) {
+                                BobImageViewProductDetail(
+                                    url = productImage,
+                                    description = "Related Product"
+                                )
+                                Text(
+                                    text = name,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                                Text(
+                                    text = price,
+                                    fontSize = 12.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                // Add to Cart & Buy Now
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            optionType = "cart"
+                            showOptionSheet = true
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+                    ) {
+                        Text("ADD TO CART", color = Color.Black)
+                    }
+                    Button(
+                        onClick = {
+                            optionType = "buy"
+                            showOptionSheet = true
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF3D00))
+                    ) {
+                        Text("BUY NOW", color = Color.White)
+                    }
+                }
+            }
+            if (showOptionSheet) {
+                ModalBottomSheet(
+                    onDismissRequest = { showOptionSheet = false },
+                    sheetState = sheetState
+                ) {
+                    ProductOptionBottomSheet(
+                        optionType = optionType,
+                        onApplyClick = { showOptionSheet = false },
+                        onNavigateToCart = { 
+                            showOptionSheet = false
+                            currentScreen = "cart"
+                        },
+                        onNavigateToCheckout = {
+                            showOptionSheet = false
+                            currentScreen = "checkout"
+                        }
+                    )
+                }
             }
         }
-        Spacer(modifier = Modifier.weight(1f))
-        // Add to Cart & Buy Now
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Button(
-                onClick = {
-                    optionType = "cart"
-                    showOptionSheet = true
-                },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-            ) {
-                Text("ADD TO CART", color = Color.Black)
-            }
-            Button(
-                onClick = {
-                    optionType = "buy"
-                    showOptionSheet = true
-                },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF3D00))
-            ) {
-                Text("BUY NOW", color = Color.White)
-            }
+        "cart" -> {
+            CartScreen(
+                onBack = { currentScreen = "detail" },
+                onCheckout = { currentScreen = "checkout" }
+            )
         }
-    }
-    if (showOptionSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showOptionSheet = false },
-            sheetState = sheetState
-        ) {
-            ProductOptionBottomSheet(onApplyClick = { showOptionSheet = false })
+        "checkout" -> {
+            CheckoutScreen(
+                onBack = { 
+                    if (optionType == "cart") {
+                        currentScreen = "cart"
+                    } else {
+                        currentScreen = "detail"
+                    }
+                },
+                onComplete = { /* Handle order completion */ }
+            )
         }
     }
 }
 
 @Composable
-fun ProductOptionBottomSheet(onApplyClick: () -> Unit) {
+fun ProductOptionBottomSheet(
+    optionType: String,
+    onApplyClick: () -> Unit,
+    onNavigateToCart: () -> Unit,
+    onNavigateToCheckout: () -> Unit
+) {
     // State untuk voucher code
     val (voucherCode, setVoucherCode) = remember { mutableStateOf("") }
     // State untuk warna
@@ -296,7 +338,13 @@ fun ProductOptionBottomSheet(onApplyClick: () -> Unit) {
         }
         Spacer(modifier = Modifier.height(32.dp))
         Button(
-            onClick = onApplyClick,
+            onClick = {
+                if (optionType == "cart") {
+                    onNavigateToCart()
+                } else {
+                    onNavigateToCheckout()
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF3D00))
         ) {
