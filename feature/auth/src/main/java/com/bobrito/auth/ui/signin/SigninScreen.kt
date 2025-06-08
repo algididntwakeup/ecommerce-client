@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bobrito.auth.MainActivity
@@ -28,8 +30,12 @@ import com.bobrito.ui.components.BobTextViewRow
 
 @Composable
 fun SigninScreen(
-    navController: NavController = rememberNavController()
+    navController: NavController = rememberNavController(),
+    viewModel: SignInViewModel = hiltViewModel(),
+
 ) {
+
+    val context = LocalContext.current
 
     Column (
         modifier = Modifier
@@ -85,7 +91,11 @@ fun SigninScreen(
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        BobButtonPrimary()
+        BobButtonPrimary(
+            onClick = {
+                viewModel.onNavigateToHome(context)
+            }
+        )
 
         BobButtonSocmedRow(
             onClickFacebook = {},

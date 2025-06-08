@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import com.bobrito.home.ui.HomeActivity
 import com.bobrito.navigator.Navigator
+import javax.inject.Inject
 
 
 class AppNavigator @Inject constructor() : Navigator {
