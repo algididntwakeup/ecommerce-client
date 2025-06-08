@@ -1,6 +1,7 @@
 package com.bobrito.home.ui.product
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -28,6 +29,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.ui.draw.clip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,6 +48,7 @@ fun ProductDetailScreen(
     onBack: () -> Unit = {},
     onAddToCart: () -> Unit = {},
     onBuyNow: () -> Unit = {},
+    productDescription: String = "Sepatu running terbaru dengan teknologi boost, nyaman dipakai harian maupun olahraga. Upper knit, outsole karet anti slip, warna putih kombinasi biru.",
     relatedProducts: List<Pair<String, String>> = listOf(
         "NMD_R1 SHOES" to "Rp250.000",
         "NMD_R1 SHOES" to "Rp375.000",
@@ -48,6 +58,7 @@ fun ProductDetailScreen(
     var showOptionSheet by remember { mutableStateOf(false) }
     var optionType by remember { mutableStateOf("") } // "buy" or "cart"
     val sheetState = rememberModalBottomSheetState()
+    var showDescriptionScreen by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -131,8 +142,15 @@ fun ProductDetailScreen(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
         )
         // Description Button
+        if (showDescriptionScreen) {
+            ProductDescriptionScreen(
+                description = productDescription,
+                onBack = { showDescriptionScreen = false }
+            )
+            return
+        }
         OutlinedButton(
-            onClick = { /* TODO: Show Description */ },
+            onClick = { showDescriptionScreen = true },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
@@ -235,6 +253,13 @@ fun ProductDetailScreen(
 
 @Composable
 fun ProductOptionBottomSheet(onApplyClick: () -> Unit) {
+    // State untuk voucher code
+    val (voucherCode, setVoucherCode) = remember { mutableStateOf("") }
+    // State untuk warna
+    val colorOptions = listOf(
+        Color.LightGray, Color.Blue, Color.Cyan, Color.Magenta, Color.Green, Color.Yellow
+    )
+    val (selectedColor, setSelectedColor) = remember { mutableStateOf(Color.LightGray) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -245,36 +270,12 @@ fun ProductOptionBottomSheet(onApplyClick: () -> Unit) {
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
-        // Free Delivery checkbox
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Free Delivery")
-            Checkbox(checked = true, onCheckedChange = { })
-        }
-        // Discount checkbox
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Discount")
-            Checkbox(checked = false, onCheckedChange = { })
-        }
-        // Special Product checkbox
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Special Product")
-            Checkbox(checked = false, onCheckedChange = { })
-        }
+        OutlinedTextField(
+            value = voucherCode,
+            onValueChange = setVoucherCode,
+            label = { Text("Enter voucher code") },
+            modifier = Modifier.fillMaxWidth()
+        )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = "CHOOSE COLOR",
@@ -285,12 +286,13 @@ fun ProductOptionBottomSheet(onApplyClick: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            ColorCircle(color = Color.LightGray, isSelected = true)
-            ColorCircle(color = Color.Blue)
-            ColorCircle(color = Color.Cyan)
-            ColorCircle(color = Color.Magenta)
-            ColorCircle(color = Color.Green)
-            ColorCircle(color = Color.Yellow)
+            colorOptions.forEach { color ->
+                ColorCircle(
+                    color = color,
+                    isSelected = color == selectedColor,
+                    onClick = { setSelectedColor(color) }
+                )
+            }
         }
         Spacer(modifier = Modifier.height(32.dp))
         Button(
@@ -299,6 +301,67 @@ fun ProductOptionBottomSheet(onApplyClick: () -> Unit) {
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF3D00))
         ) {
             Text("Apply now", color = Color.White)
+        }
+    }
+}
+
+@Composable
+fun ColorCircle(color: Color, isSelected: Boolean = false, onClick: (() -> Unit)? = null) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(color)
+            .clickable(enabled = onClick != null) { onClick?.invoke() }
+            .then(if (isSelected) Modifier.border(2.dp, Color.Gray, CircleShape) else Modifier)
+    ) {
+        if (isSelected) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = "Selected",
+                tint = Color.White,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+    }
+}
+
+@Composable
+fun ProductDescriptionScreen(description: String, onBack: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White)
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back",
+                modifier = Modifier
+                    .clickable { onBack() }
+                    .padding(end = 8.dp)
+            )
+            Text(
+                text = "Description",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }
