@@ -22,11 +22,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.bobrito.home.ui.AccountScreens
 import com.bobrito.home.ui.BottomNavItem
 import com.bobrito.home.ui.order.OrderScreens
 import com.bobrito.home.ui.Product.ProductScreens
 import com.bobrito.home.ui.home.HomeScreen
+import com.bobrito.home.ui.account.AccountScreens
 import com.bobrito.ui.theme.AbuMonyetGelap
 
 @Composable
