@@ -37,6 +37,7 @@ import com.bobrito.ui.components.BobImageViewPhotoUrlRounded
 import com.bobrito.ui.components.BobTextRegular
 import com.bobrito.ui.theme.birudongker
 import com.bobrito.ui.theme.BiruPersib
+import com.bobrito.ui.theme.birudongker
 
 @Composable
 fun AccountScreens() {
