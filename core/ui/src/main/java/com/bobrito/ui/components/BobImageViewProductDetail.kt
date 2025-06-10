@@ -21,7 +21,7 @@ import com.bobrito.ui.theme.VeryLightGrey
 
 @Composable
 fun BobImageViewProductDetail(
-    url: String,
+    url: String?,
     description: String,
     modifier: Modifier = Modifier
 ) {

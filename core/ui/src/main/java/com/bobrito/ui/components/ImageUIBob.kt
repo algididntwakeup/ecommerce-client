@@ -44,7 +44,7 @@ fun BobImageViewClick(
 
 @Composable
 fun BobImageViewPhotoUrlRounded(
-    url: String,
+    url: String?,
     description: String,
     modifier: Modifier = Modifier // Tambah parameter modifier
 ) {
