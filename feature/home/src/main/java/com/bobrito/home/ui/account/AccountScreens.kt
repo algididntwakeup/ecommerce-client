@@ -36,13 +36,14 @@ import com.bobrito.ui.components.BobImageViewClick
 import com.bobrito.ui.components.BobImageViewPhotoUrlRounded
 import com.bobrito.ui.components.BobTextRegular
 import com.bobrito.ui.theme.BiruPersib
+import com.bobrito.ui.theme.birudongker
 
 @Composable
 fun AccountScreens() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(BiruPersib),
+            .background(birudongker),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Header Row
@@ -81,7 +82,7 @@ fun AccountScreens() {
 
         // Profile Picture
         BobImageViewPhotoUrlRounded(
-            url = "https://i1.rgstatic.net/ii/profile.image/989197649334273-1612854506132_Q512/Wanda-Gusdya-2.jpg",
+            url = "https://graziamagazine.com/wp-content/uploads/2020/07/GettyImages-76214713.jpg?resize=1024%2C1443",
             description = "profile pic",
             modifier = Modifier.padding(16.dp)
         )
@@ -93,7 +94,7 @@ fun AccountScreens() {
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .align(Alignment.CenterHorizontally),
-            text = "Selamat Datang, Wanda Hamidah!",
+            text = "Selamat Datang, Lady Diana!",
             color = Color.White
         )
 
@@ -114,7 +115,7 @@ fun AccountScreens() {
                 iconRight = Icons.AutoMirrored.Filled.KeyboardArrowRight
             ),
             MenuItem(
-                iconLeft = Icons.Outlined.FavoriteBorder, // ❤️ Heart outline untuk Wishlist
+                iconLeft = Icons.Outlined.FavoriteBorder, // ❤ Heart outline untuk Wishlist
                 label = "Wishlist",
                 iconRight = Icons.AutoMirrored.Filled.KeyboardArrowRight
             ),
