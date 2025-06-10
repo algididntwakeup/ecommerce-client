@@ -136,16 +136,16 @@ fun ItemProductGrid(){
                     )
                 ) {
                     BobImageViewPhotoUrlRounded(
-                        url = "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
+                        url = "https://media.karousell.com/media/photos/products/2023/8/23/sepatu_adidas_samba_og_authent_1692765930_c8208dce.jpg",
                         description = "pap"
                     )
                 }
                 BobTextRegular(
-                    text = "Nama Produt",
+                    text = "Adidas Samba",
                     modifier = Modifier.padding(top = 11.dp)
                 )
                 BobTextRegular(
-                    text = "Rp. 250.000",
+                    text = "Rp. 2.250.000",
                     modifier = Modifier.padding(top = 9.dp),
                     color = OrenGoogle
                 )
