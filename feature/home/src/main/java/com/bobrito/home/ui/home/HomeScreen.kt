@@ -40,8 +40,12 @@ import com.bobrito.ui.components.BannerSliderUIBob
 import com.bobrito.ui.components.BobImageViewClick
 import com.bobrito.ui.components.BobImageViewPhotoUrlRounded
 import com.bobrito.ui.components.BobTextRegular
+import com.bobrito.ui.theme.BiruPersib
 import com.bobrito.ui.theme.Purple40
+import com.bobrito.ui.theme.VividMagenta
 import com.bobrito.ui.theme.birudongker
+import com.bobrito.ui.theme.oranye
+
 
 @Composable
 fun HomeScreen() {
