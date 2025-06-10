@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.bobrito.ui.components.BobImageViewClick
 import com.bobrito.ui.components.BobImageViewPhotoUrlRounded
 import com.bobrito.ui.components.BobTextRegular
+import com.bobrito.ui.theme.birudongker
 import com.bobrito.ui.theme.BiruPersib
 import com.bobrito.ui.theme.birudongker
 
@@ -115,7 +116,7 @@ fun AccountScreens() {
                 iconRight = Icons.AutoMirrored.Filled.KeyboardArrowRight
             ),
             MenuItem(
-                iconLeft = Icons.Outlined.FavoriteBorder, // ❤️ Heart outline untuk Wishlist
+                iconLeft = Icons.Outlined.FavoriteBorder, // ❤ Heart outline untuk Wishlist
                 label = "Wishlist",
                 iconRight = Icons.AutoMirrored.Filled.KeyboardArrowRight
             ),

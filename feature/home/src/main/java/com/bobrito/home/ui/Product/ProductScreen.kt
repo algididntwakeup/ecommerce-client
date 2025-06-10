@@ -30,7 +30,6 @@ import com.bobrito.ui.components.BobImageViewPhotoUrlRounded
 import com.bobrito.ui.components.BobTextRegular
 import com.bobrito.ui.theme.AbuKebiruan
 import com.bobrito.ui.theme.Abuabu
-import com.bobrito.ui.theme.OrenGoogle
 import com.bobrito.ui.theme.VeryLightGrey
 
 
@@ -134,8 +133,8 @@ fun ItemProduct() {
                     )
                 ) {
                     BobImageViewPhotoUrlRounded(
-                        url = "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                        description = "produt"
+                        url = "https://www.footlocker.id/media/catalog/product/0/2/02-ASICS-FFSSEASIA-ASI23A536100-White.jpg?optimize=medium&bg-color=255,255,255&fit=bounds&height=1200&width=1200&canvas=1200:1200",
+                        description = "Gel-Venture 6 shoes"
                     )
                 }
 
@@ -146,14 +145,15 @@ fun ItemProduct() {
 
                 Column {
                     BobTextRegular(
-                        text = "Nama Produt",
+                        text = "Gel-Venture 6 shoes",
                         modifier = Modifier
 
                     )
                     BobTextRegular(
-                        text = "Rp. 250.000",
-                        modifier = Modifier.padding(top = 7.dp),
-                        color = OrenGoogle
+                        text = "Rp. 2.499.000",
+                        modifier = Modifier
+                            .padding(top = 7.dp),
+                        color = Color.Black
                     )
                     RatingBar(
                         rating = 2f,

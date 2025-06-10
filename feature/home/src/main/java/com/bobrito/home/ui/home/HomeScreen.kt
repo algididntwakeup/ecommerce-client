@@ -40,22 +40,22 @@ import com.bobrito.ui.components.BannerSliderUIBob
 import com.bobrito.ui.components.BobImageViewClick
 import com.bobrito.ui.components.BobImageViewPhotoUrlRounded
 import com.bobrito.ui.components.BobTextRegular
-import com.bobrito.ui.theme.BiruPersib
-import com.bobrito.ui.theme.VividMagenta
+import com.bobrito.ui.theme.Purple40
+import com.bobrito.ui.theme.birudongker
 
 @Composable
 fun HomeScreen() {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(BiruPersib) // Background biru dulu
+            .background(birudongker) // Background biru dulu
     ) {
         item {
             // Header Section dengan background colored
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(BiruPersib)
+                    .background(birudongker)
                     .padding(bottom = 24.dp)
             ) {
                 // Search Bar dan Shopping Cart
@@ -110,9 +110,9 @@ fun HomeScreen() {
 
                 // Banner Slider
                 val sampleImages = listOf(
-                    painterResource(id = R.drawable.sample_slide1),
-                    painterResource(id = R.drawable.sample_slide1),
-                    painterResource(id = R.drawable.sample_slide1)
+                    painterResource(id = R.drawable.pap1),
+                    painterResource(id = R.drawable.pap2),
+                    painterResource(id = R.drawable.pap3),
                 )
 
                 BannerSliderUIBob(
@@ -215,7 +215,7 @@ fun ItemProductHomeList(
                 val annotatedString = buildAnnotatedString {
                     withStyle(
                         style = SpanStyle(
-                            color = VividMagenta,
+                            color = Purple40,
                             fontWeight = FontWeight.Medium
                         )
                     ) {
@@ -227,6 +227,7 @@ fun ItemProductHomeList(
                     text = annotatedString,
                     modifier = Modifier.clickable {
                         onSeeAllClick(item.title)
+
                     },
                     style = MaterialTheme.typography.bodyMedium
                 )
