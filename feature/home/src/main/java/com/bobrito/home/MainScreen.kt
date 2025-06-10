@@ -25,11 +25,10 @@ import androidx.navigation.compose.rememberNavController
 import com.bobrito.home.ui.AccountScreens
 import com.bobrito.home.ui.BottomNavItem
 import com.bobrito.home.ui.OrderScreens
-//import com.bobrito.home.ui.ProductScreens
+import com.bobrito.home.ui.categories.CategoriesScreen
 import com.bobrito.home.ui.home.HomeScreen
 import com.bobrito.home.ui.product.ProductScreens
 import com.bobrito.ui.theme.AbuMonyetGelap
-
 
 @Composable
 fun MainScreen() {
@@ -81,12 +80,12 @@ fun bottomNavigationBar(navController: NavController) {
                             lineHeight = 12.sp,
                             textAlign = TextAlign.Center
                         ),
-                            color = AbuMonyetGelap
-                        )
+                        color = AbuMonyetGelap
+                    )
                 },
                 selected = currentRoute == item.route,
                 onClick = {
-                    navController.navigate(item.route){
+                    navController.navigate(item.route) {
                         popUpTo(navController.graph.startDestinationId)
                         launchSingleTop = true
                     }
@@ -94,23 +93,53 @@ fun bottomNavigationBar(navController: NavController) {
                 alwaysShowLabel = true
             )
         }
-                }
-
+    }
 }
 
 @Composable
-fun NavigationGraph(navController: NavHostController, modifier: Modifier){
-    NavHost(navController = navController,
+fun NavigationGraph(navController: NavHostController, modifier: Modifier) {
+    NavHost(
+        navController = navController,
         startDestination = BottomNavItem.Home.route,
         modifier = modifier
     ) {
-        composable(BottomNavItem.Home.route) { HomeScreen() }
-        composable(BottomNavItem.Product.route) { ProductScreens() }
+        composable(BottomNavItem.Home.route) { 
+            HomeScreen(
+                onCategoriesSeeAll = {
+                    navController.navigate("categories")
+                },
+                onCategorySelected = { category ->
+                    navController.navigate("product/$category")
+                }
+            ) 
+        }
+        composable(BottomNavItem.Product.route) { 
+            ProductScreens(
+                onBack = { navController.popBackStack() }
+            ) 
+        }
+        composable("product/{category}") { backStackEntry ->
+            val category = backStackEntry.arguments?.getString("category")
+            ProductScreens(
+                category = category,
+                onBack = { navController.popBackStack() }
+            )
+        }
         composable(BottomNavItem.Order.route) { OrderScreens() }
         composable(BottomNavItem.Account.route) { AccountScreens() }
+        
+        // Categories screen
+        composable("categories") {
+            CategoriesScreen(
+                onBack = { navController.popBackStack() },
+                onCategorySelected = { category ->
+                    navController.navigate("product/$category") {
+                        popUpTo("categories")
+                    }
+                }
+            )
+        }
     }
-
-
 }
 
 @Preview(
