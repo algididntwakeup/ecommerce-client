@@ -22,7 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.foundation.lazy.LazyColumn
@@ -53,7 +53,10 @@ import com.bobrito.home.ui.product.ProductDetailScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductScreens() {
+fun ProductScreens(
+    category: String? = null,
+    onBack: () -> Unit = {}
+) {
     val showBottomSheet = remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     var showDetail by remember { mutableStateOf(false) }
@@ -77,11 +80,11 @@ fun ProductScreens() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Default.ArrowBack,
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
                 modifier = Modifier
                     .padding(end = 8.dp)
-                    .clickable { /* Handle back click */ }
+                    .clickable { onBack() }
             )
             Card(
                 modifier = Modifier
@@ -89,7 +92,7 @@ fun ProductScreens() {
                     .weight(1f)
                     .clickable { },
                 colors = CardDefaults.cardColors(
-                    containerColor = Gray.copy(alpha = 0.1f)
+                    containerColor = Color.Gray.copy(alpha = 0.1f)
                 )
             ) {
                 Row(
@@ -99,11 +102,9 @@ fun ProductScreens() {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
                     JelloTextRegular(
                         modifier = Modifier.weight(1f)
                     )
-
                     JelloImageViewClick(
                         modifier = Modifier.padding(start = 8.dp)
                     )
@@ -111,7 +112,7 @@ fun ProductScreens() {
             }
         }
 
-        // New Product section
+        // Category or New Product header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -120,7 +121,7 @@ fun ProductScreens() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "NEW PRODUCT",
+                text = category ?: "NEW PRODUCT",
                 style = MaterialTheme.typography.titleMedium
             )
             Row(
@@ -158,7 +159,6 @@ fun ProductScreens() {
     }
 }
 
-
 @Composable
 fun JelloTextRegular(
     modifier: Modifier = Modifier
@@ -168,7 +168,6 @@ fun JelloTextRegular(
         modifier = modifier
     )
 }
-
 
 @Composable
 fun JelloImageViewClick(
