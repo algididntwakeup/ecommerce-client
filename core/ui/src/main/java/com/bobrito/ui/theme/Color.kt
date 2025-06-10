@@ -22,4 +22,5 @@ val Abuabu = Color(0xFFACACAC)
 val Abuhalus = Color(0xFFB4B4B4)
 val OrenBintang = Color(0xFFF7B500)
 val birudongker = Color(0xFF0B0B45)
+
 val oranye = Color (0xFFFF4500)

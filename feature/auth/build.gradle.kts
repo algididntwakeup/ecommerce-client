@@ -2,6 +2,9 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt.gradle.plugin)
+    id("kotlin-kapt")
+
 }
 
 android {
@@ -42,6 +45,7 @@ android {
 dependencies {
     //module
     implementation(project(":core:ui"))
+    implementation(project(":core:navigator"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -53,6 +57,12 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.appcompat)
 
+    //    dagger hilt belah sini bre
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
+    kapt("androidx.hilt:hilt-compiler:1.2.0")
+
+
     // Fix Hilt Navigation Compose - pakai versi yang benar
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
@@ -63,4 +73,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     debugImplementation(libs.ui.tooling)
+}
+kapt {
+    correctErrorTypes = true
 }
