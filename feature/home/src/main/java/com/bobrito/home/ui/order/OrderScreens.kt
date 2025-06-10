@@ -32,6 +32,7 @@ import com.bobrito.ui.theme.AbuKebiruan
 import com.bobrito.ui.theme.Abuabu
 import com.bobrito.ui.theme.OrenGoogle
 import com.bobrito.ui.theme.VeryLightGrey
+import com.bobrito.ui.theme.oranye
 
 @Composable
 fun OrderScreens () {
@@ -147,7 +148,7 @@ fun ItemProductGrid(){
                 BobTextRegular(
                     text = "Rp. 250.000",
                     modifier = Modifier.padding(top = 9.dp),
-                    color = OrenGoogle
+                    color = oranye
                 )
             }
         }
