@@ -35,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.bobrito.home.ui.categories.CategoryItem
 import com.bobrito.ui.R
 import com.bobrito.ui.components.BannerSliderUIBob
 import com.bobrito.ui.components.BobImageViewClick
@@ -44,11 +45,58 @@ import com.bobrito.ui.theme.BiruPersib
 import com.bobrito.ui.theme.VividMagenta
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onCategoriesSeeAll: () -> Unit = {},
+    onCategorySelected: (String) -> Unit = {},  // Ini untuk navigate ke products berdasarkan category
+    onProductSelected: (String) -> Unit = {}    // Ini untuk navigate ke product detail
+) {
+    // Define categories list
+    val categories = listOf(
+        CategoryItem("1", "Sneakers"),
+        CategoryItem("2", "Boots"),
+        CategoryItem("3", "Sandals"),
+        CategoryItem("4", "Flip Flops"),
+        CategoryItem("5", "Slippers"),
+        CategoryItem("6", "Socks"),
+    )
+
+    // Sample products for New Release and Popular Items
+    val newReleaseProducts = listOf(
+        CategoryItem("7", "New Sneaker 1"),
+        CategoryItem("8", "New Boot 1"),
+        CategoryItem("9", "New Sandal 1"),
+        CategoryItem("10", "New Flip Flop 1")
+    )
+
+    val popularProducts = listOf(
+        CategoryItem("11", "Popular Sneaker 1"),
+        CategoryItem("12", "Popular Boot 1"),
+        CategoryItem("13", "Popular Sandal 1"),
+        CategoryItem("14", "Popular Flip Flop 1")
+    )
+
+    val productItems = listOf(
+        ProductItem(
+            title = "Categories",
+            subItems = categories,
+            itemType = ItemType.CATEGORY
+        ),
+        ProductItem(
+            title = "New Release",
+            subItems = newReleaseProducts,
+            itemType = ItemType.PRODUCT
+        ),
+        ProductItem(
+            title = "Popular Items",
+            subItems = popularProducts,
+            itemType = ItemType.PRODUCT
+        )
+    )
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(BiruPersib) // Background biru dulu
+            .background(BiruPersib)
     ) {
         item {
             // Header Section dengan background colored
@@ -125,69 +173,52 @@ fun HomeScreen() {
             }
         }
 
-        // Content Section dengan rounded corners - INI YANG PENTING!
+        // Content Section dengan rounded corners
         item {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)) // Clip di sini
-                    .background(Color.White) // Background putih setelah clip
-                    .padding(top = 24.dp) // Padding setelah background
+                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                    .background(Color.White)
+                    .padding(top = 24.dp)
             ) {
-                val productItems = listOf(
-                    ProductItem(
-                        "Categories",
-                        listOf(
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg "
-                        )
-                    ),
-                    ProductItem(
-                        "New Release",
-                        listOf(
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg "
-                        )
-                    ),
-                    ProductItem(
-                        "Popular Items",
-                        listOf(
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg "
-                        )
-                    )
-                )
-
                 ItemProductHomeList(
                     items = productItems,
                     onSeeAllClick = { category ->
-                        println("See All clicked for: $category")
-                    }
+                        if (category == "Categories") {
+                            onCategoriesSeeAll()
+                        } else {
+                            println("See All clicked for: $category")
+                        }
+                    },
+                    onCategorySelected = onCategorySelected,  // Pass ke function untuk navigate ke products
+                    onProductSelected = onProductSelected    // Pass ke function untuk navigate ke product detail
                 )
 
-                // Tambah padding bottom biar gak kepotong
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
 }
 
+// Enum untuk membedakan tipe item
+enum class ItemType {
+    CATEGORY,
+    PRODUCT
+}
 
 data class ProductItem(
     val title: String,
-    val subItems: List<String> = emptyList()
+    val subItems: List<CategoryItem> = emptyList(),
+    val itemType: ItemType = ItemType.PRODUCT  // Default adalah product
 )
 
 @Composable
 fun ItemProductHomeList(
     items: List<ProductItem>,
-    onSeeAllClick: (String) -> Unit = {}
+    onSeeAllClick: (String) -> Unit = {},
+    onCategorySelected: (String) -> Unit = {},  // Untuk category click
+    onProductSelected: (String) -> Unit = {}    // Untuk product click
 ) {
     Column(
         modifier = Modifier.padding(horizontal = 16.dp)
@@ -201,7 +232,6 @@ fun ItemProductHomeList(
                 horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Bold, elegant typography sesuai guidelines
                 Text(
                     text = item.title,
                     style = MaterialTheme.typography.headlineSmall.copy(
@@ -211,7 +241,6 @@ fun ItemProductHomeList(
                     color = Color.Black
                 )
 
-                // See All dengan styled text
                 val annotatedString = buildAnnotatedString {
                     withStyle(
                         style = SpanStyle(
@@ -233,16 +262,25 @@ fun ItemProductHomeList(
             }
 
             // Product Items Row
-            SubItemList(subItems = item.subItems)
+            SubItemList(
+                subItems = item.subItems,
+                itemType = item.itemType,
+                onCategorySelected = onCategorySelected,
+                onProductSelected = onProductSelected
+            )
 
-            // Spacer between sections - lots of whitespace sesuai guidelines
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
 
 @Composable
-fun SubItemList(subItems: List<String>) {
+fun SubItemList(
+    subItems: List<CategoryItem>,
+    itemType: ItemType,
+    onCategorySelected: (String) -> Unit = {},
+    onProductSelected: (String) -> Unit = {}
+) {
     LazyRow(
         horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)
     ) {
@@ -252,15 +290,25 @@ fun SubItemList(subItems: List<String>) {
                     .width(140.dp)
                     .height(160.dp)
                     .clickable {
-                        // Handle item click
+                        // Berbeda handling berdasarkan tipe item
+                        when (itemType) {
+                            ItemType.CATEGORY -> {
+                                // Untuk category, pass category ID untuk navigate ke products by category
+                                onCategorySelected(item.name)
+                            }
+                            ItemType.PRODUCT -> {
+                                // Untuk product, pass product ID untuk navigate ke product detail
+                                onProductSelected(item.name)
+                            }
+                        }
                     },
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White
                 ),
                 elevation = CardDefaults.cardElevation(
-                    defaultElevation = 2.dp // Subtle shadows sesuai guidelines
+                    defaultElevation = 2.dp
                 ),
-                shape = RoundedCornerShape(12.dp) // Consistent rounded corners
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Column(
                     modifier = Modifier
@@ -269,17 +317,16 @@ fun SubItemList(subItems: List<String>) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     BobImageViewPhotoUrlRounded(
-                        url = item,
-                        description = "Product image",
+                        url = item.imageUrl,
+                        description = item.name,
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Product name placeholder
                     Text(
-                        text = "Product Name",
+                        text = item.name,
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontWeight = FontWeight.Medium
                         ),
@@ -302,8 +349,11 @@ fun HomeScreensPreview() {
 @Composable
 fun SubItemListPreview() {
     val temp = listOf(
-        "https://picsum.photos/200/200?random=1",
-        "https://picsum.photos/200/200?random=2"
+        CategoryItem("1", "Sneakers"),
+        CategoryItem("2", "Boots")
     )
-    SubItemList(temp)
+    SubItemList(
+        subItems = temp,
+        itemType = ItemType.CATEGORY
+    )
 }
