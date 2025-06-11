@@ -46,9 +46,9 @@ import com.bobrito.ui.theme.VividMagenta
 
 @Composable
 fun HomeScreen(
-    onCategoriesSeeAll: () -> Unit = {},
-    onCategorySelected: (String) -> Unit = {},  // Ini untuk navigate ke products berdasarkan category
-    onProductSelected: (String) -> Unit = {}    // Ini untuk navigate ke product detail
+    onCategoriesSeeAll: () -> Unit,
+    onCategorySelected: (String) -> Unit,
+    onNavigateToCart: () -> Unit = {}
 ) {
     // Define categories list
     val categories = listOf(
@@ -150,9 +150,7 @@ fun HomeScreen(
                     BobImageViewClick(
                         color = Color.White,
                         imageVector = Icons.Outlined.ShoppingCart,
-                        onClick = {
-                            // Handle cart click
-                        }
+                        onClick = onNavigateToCart
                     )
                 }
 
@@ -192,7 +190,10 @@ fun HomeScreen(
                         }
                     },
                     onCategorySelected = onCategorySelected,  // Pass ke function untuk navigate ke products
-                    onProductSelected = onProductSelected    // Pass ke function untuk navigate ke product detail
+                    onProductSelected = { product ->
+                        // Implementasi navigate ke product detail
+                        println("Product $product selected")
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -342,7 +343,10 @@ fun SubItemList(
 @Preview(showBackground = true, showSystemUi = true, device = Devices.PIXEL_5)
 @Composable
 fun HomeScreensPreview() {
-    HomeScreen()
+    HomeScreen(
+        onCategoriesSeeAll = {},
+        onCategorySelected = {}
+    )
 }
 
 @Preview(showBackground = true)

@@ -27,6 +27,7 @@ import com.bobrito.home.ui.BottomNavItem
 import com.bobrito.home.ui.OrderScreens
 import com.bobrito.home.ui.categories.CategoriesScreen
 import com.bobrito.home.ui.home.HomeScreen
+import com.bobrito.home.ui.cart.CartScreen
 import com.bobrito.home.ui.product.ProductScreens
 import com.bobrito.ui.theme.AbuMonyetGelap
 
@@ -85,9 +86,16 @@ fun bottomNavigationBar(navController: NavController) {
                 },
                 selected = currentRoute == item.route,
                 onClick = {
-                    navController.navigate(item.route) {
-                        popUpTo(navController.graph.startDestinationId)
-                        launchSingleTop = true
+                    if (item.route == "order") {
+                        navController.navigate("cart") {
+                            popUpTo(navController.graph.startDestinationId)
+                            launchSingleTop = true
+                        }
+                    } else {
+                        navController.navigate(item.route) {
+                            popUpTo(navController.graph.startDestinationId)
+                            launchSingleTop = true
+                        }
                     }
                 },
                 alwaysShowLabel = true
@@ -103,20 +111,23 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier) {
         startDestination = BottomNavItem.Home.route,
         modifier = modifier
     ) {
-        composable(BottomNavItem.Home.route) { 
+        composable(BottomNavItem.Home.route) {
             HomeScreen(
                 onCategoriesSeeAll = {
                     navController.navigate("categories")
                 },
                 onCategorySelected = { category ->
                     navController.navigate("product/$category")
+                },
+                onNavigateToCart = {
+                    navController.navigate("cart")
                 }
-            ) 
+            )
         }
-        composable(BottomNavItem.Product.route) { 
+        composable(BottomNavItem.Product.route) {
             ProductScreens(
                 onBack = { navController.popBackStack() }
-            ) 
+            )
         }
         composable("product/{category}") { backStackEntry ->
             val category = backStackEntry.arguments?.getString("category")
@@ -127,7 +138,7 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier) {
         }
         composable(BottomNavItem.Order.route) { OrderScreens() }
         composable(BottomNavItem.Account.route) { AccountScreens() }
-        
+
         // Categories screen
         composable("categories") {
             CategoriesScreen(
@@ -139,13 +150,22 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier) {
                 }
             )
         }
+
+        // Cart screen
+        composable("cart") {
+            CartScreen(
+                onBack = { navController.popBackStack() },
+                onCheckout = {
+                    navController.navigate("checkout")
+                }
+            )
+        }
     }
 }
 
 @Preview(
     showBackground = true, device = Devices.NEXUS_5
 )
-
 @Composable
 fun MainScreenPreview() {
     MainScreen()
