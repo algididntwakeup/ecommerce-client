@@ -160,7 +160,7 @@ fun ProductScreens(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = category ?: "NEW PRODUCT",
+                text = category ?: "ALL PRODUCT",
                 style = MaterialTheme.typography.titleMedium
             )
             Row(

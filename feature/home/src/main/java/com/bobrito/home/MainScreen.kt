@@ -25,10 +25,12 @@ import androidx.navigation.compose.rememberNavController
 import com.bobrito.home.ui.AccountScreens
 import com.bobrito.home.ui.BottomNavItem
 import com.bobrito.home.ui.OrderScreens
+import com.bobrito.home.ui.cart.CartScreen
 import com.bobrito.home.ui.categories.CategoriesScreen
 import com.bobrito.home.ui.home.HomeScreen
-import com.bobrito.home.ui.cart.CartScreen
 import com.bobrito.home.ui.product.ProductScreens
+import com.bobrito.home.ui.profile.ProfileScreen
+import com.bobrito.home.ui.search.SearchScreen
 import com.bobrito.ui.theme.AbuMonyetGelap
 
 @Composable
@@ -86,15 +88,18 @@ fun bottomNavigationBar(navController: NavController) {
                 },
                 selected = currentRoute == item.route,
                 onClick = {
-                    if (item.route == "order") {
-                        navController.navigate("cart") {
-                            popUpTo(navController.graph.startDestinationId)
-                            launchSingleTop = true
+                    when (item.route) {
+                        "order" -> {
+                            navController.navigate("cart") {
+                                popUpTo(navController.graph.startDestinationId)
+                                launchSingleTop = true
+                            }
                         }
-                    } else {
-                        navController.navigate(item.route) {
-                            popUpTo(navController.graph.startDestinationId)
-                            launchSingleTop = true
+                        else -> {
+                            navController.navigate(item.route) {
+                                popUpTo(navController.graph.startDestinationId)
+                                launchSingleTop = true
+                            }
                         }
                     }
                 },
@@ -121,6 +126,9 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier) {
                 },
                 onNavigateToCart = {
                     navController.navigate("cart")
+                },
+                onSearchClick = {
+                    navController.navigate("search")
                 }
             )
         }
@@ -137,7 +145,15 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier) {
             )
         }
         composable(BottomNavItem.Order.route) { OrderScreens() }
-        composable(BottomNavItem.Account.route) { AccountScreens() }
+        composable(BottomNavItem.Account.route) {
+            ProfileScreen(
+                onBack = { /* Do nothing since this is a main tab */ },
+                onEditProfile = { navController.navigate("edit_profile") },
+                onShippingAddress = { navController.navigate("shipping_address") },
+                onWishlist = { navController.navigate("wishlist") },
+                onOrderHistory = { navController.navigate("order_history") }
+            )
+        }
 
         // Categories screen
         composable("categories") {
@@ -158,6 +174,13 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier) {
                 onCheckout = {
                     navController.navigate("checkout")
                 }
+            )
+        }
+
+        // Search screen
+        composable("search") {
+            SearchScreen(
+                onBackClick = { navController.popBackStack() }
             )
         }
     }

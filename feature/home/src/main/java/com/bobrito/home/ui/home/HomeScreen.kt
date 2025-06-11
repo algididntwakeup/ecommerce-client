@@ -48,7 +48,8 @@ import com.bobrito.ui.theme.VividMagenta
 fun HomeScreen(
     onCategoriesSeeAll: () -> Unit,
     onCategorySelected: (String) -> Unit,
-    onNavigateToCart: () -> Unit = {}
+    onNavigateToCart: () -> Unit = {},
+    onSearchClick: () -> Unit = {}
 ) {
     // Define categories list
     val categories = listOf(
@@ -116,9 +117,7 @@ fun HomeScreen(
                     Card(
                         modifier = Modifier
                             .weight(1f)
-                            .clickable {
-                                // Handle search click
-                            },
+                            .clickable(onClick = onSearchClick),
                         colors = CardDefaults.cardColors(
                             containerColor = Color.White.copy(alpha = 0.2f)
                         ),
@@ -133,9 +132,7 @@ fun HomeScreen(
                             BobImageViewClick(
                                 color = Color.White,
                                 imageVector = Icons.Outlined.Search,
-                                onClick = {
-                                    // Handle search icon click
-                                }
+                                onClick = onSearchClick
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             BobTextRegular(
@@ -340,12 +337,14 @@ fun SubItemList(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true, device = Devices.PIXEL_5)
+@Preview
 @Composable
-fun HomeScreensPreview() {
+fun HomeScreenPreview() {
     HomeScreen(
         onCategoriesSeeAll = {},
-        onCategorySelected = {}
+        onCategorySelected = {},
+        onNavigateToCart = {},
+        onSearchClick = {}
     )
 }
 
