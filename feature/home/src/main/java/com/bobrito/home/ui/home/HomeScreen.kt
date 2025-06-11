@@ -2,14 +2,7 @@ package com.bobrito.home.ui.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -17,11 +10,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,12 +27,58 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bobrito.home.ui.categories.CategoryItem
 import com.bobrito.ui.R
-import com.bobrito.ui.components.BannerSliderUIBob
-import com.bobrito.ui.components.BobImageViewClick
-import com.bobrito.ui.components.BobImageViewPhotoUrlRounded
-import com.bobrito.ui.components.BobTextRegular
+import com.bobrito.ui.components.*
 import com.bobrito.ui.theme.BiruPersib
 import com.bobrito.ui.theme.VividMagenta
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Header
+
+// Data classes for API responses
+data class CategoryResponse(
+    val success: Boolean,
+    val data: List<Category>,
+    val message: String,
+    val error: String?
+)
+
+data class Category(
+    val id: String,
+    val name: String,
+    val createdAt: String,
+    val updatedAt: String
+)
+
+data class ProductResponse(
+    val success: Boolean,
+    val data: List<Product>,
+    val message: String,
+    val error: String?
+)
+
+data class Product(
+    val id: String,
+    val productName: String,
+    val description: String,
+    val price: Int,
+    val imageUrl: String,
+    val categoryId: String,
+    val brandId: String,
+    val createdAt: String,
+    val updatedAt: String
+)
+
+// API Service interfaces
+interface CategoryApiService {
+    @GET("api/v1/categories")
+    suspend fun getCategories(@Header("Authorization") token: String): CategoryResponse
+}
+
+interface ProductApiService {
+    @GET("api/v1/products")
+    suspend fun getProducts(@Header("Authorization") token: String): ProductResponse
+}
 
 @Composable
 fun HomeScreen(
@@ -51,45 +87,64 @@ fun HomeScreen(
     onNavigateToCart: () -> Unit = {},
     onSearchClick: () -> Unit = {}
 ) {
-    // Define categories list
-    val categories = listOf(
-        CategoryItem("1", "Sneakers"),
-        CategoryItem("2", "Boots"),
-        CategoryItem("3", "Sandals"),
-        CategoryItem("4", "Flip Flops"),
-        CategoryItem("5", "Slippers"),
-        CategoryItem("6", "Socks"),
-    )
+    var categories by remember { mutableStateOf<List<Category>>(emptyList()) }
+    var allProducts by remember { mutableStateOf<List<Product>>(emptyList()) }
+    var newReleaseProducts by remember { mutableStateOf<List<Product>>(emptyList()) }
+    var popularProducts by remember { mutableStateOf<List<Product>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf<String?>(null) }
 
-    // Sample products for New Release and Popular Items
-    val newReleaseProducts = listOf(
-        CategoryItem("7", "New Sneaker 1"),
-        CategoryItem("8", "New Boot 1"),
-        CategoryItem("9", "New Sandal 1"),
-        CategoryItem("10", "New Flip Flop 1")
-    )
+    // Create Retrofit instance
+    val retrofit = remember {
+        Retrofit.Builder()
+            .baseUrl("https://ecommerce-gaiia-api.vercel.app/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
 
-    val popularProducts = listOf(
-        CategoryItem("11", "Popular Sneaker 1"),
-        CategoryItem("12", "Popular Boot 1"),
-        CategoryItem("13", "Popular Sandal 1"),
-        CategoryItem("14", "Popular Flip Flop 1")
-    )
+    val categoryApiService = remember { retrofit.create(CategoryApiService::class.java) }
+    val productApiService = remember { retrofit.create(ProductApiService::class.java) }
+
+    // Fetch categories and products when the screen is first displayed
+    LaunchedEffect(Unit) {
+        try {
+            // Fetch categories
+            val categoryResponse = categoryApiService.getCategories("Bearer prakmobile")
+            if (categoryResponse.success) {
+                categories = categoryResponse.data
+            }
+
+            // Fetch products
+            val productResponse = productApiService.getProducts("Bearer prakmobile")
+            if (productResponse.success) {
+                allProducts = productResponse.data
+
+                // Shuffle products and take 7 for new release and popular
+                val shuffledProducts = allProducts.shuffled()
+                newReleaseProducts = shuffledProducts.take(7)
+                popularProducts = shuffledProducts.drop(7).take(7)
+            }
+        } catch (e: Exception) {
+            error = e.message ?: "Failed to fetch data"
+        } finally {
+            isLoading = false
+        }
+    }
 
     val productItems = listOf(
         ProductItem(
             title = "Categories",
-            subItems = categories,
+            subItems = categories.map { CategoryItem(it.id, it.name) },
             itemType = ItemType.CATEGORY
         ),
         ProductItem(
             title = "New Release",
-            subItems = newReleaseProducts,
+            subItems = newReleaseProducts.map { CategoryItem(it.id, it.productName) },
             itemType = ItemType.PRODUCT
         ),
         ProductItem(
             title = "Popular Items",
-            subItems = popularProducts,
+            subItems = popularProducts.map { CategoryItem(it.id, it.productName) },
             itemType = ItemType.PRODUCT
         )
     )
@@ -170,30 +225,52 @@ fun HomeScreen(
 
         // Content Section dengan rounded corners
         item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                    .background(Color.White)
-                    .padding(top = 24.dp)
-            ) {
-                ItemProductHomeList(
-                    items = productItems,
-                    onSeeAllClick = { category ->
-                        if (category == "Categories") {
-                            onCategoriesSeeAll()
-                        } else {
-                            println("See All clicked for: $category")
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (error != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = error ?: "Unknown error",
+                        color = Color.Red
+                    )
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                        .background(Color.White)
+                        .padding(top = 24.dp)
+                ) {
+                    ItemProductHomeList(
+                        items = productItems,
+                        onSeeAllClick = { category ->
+                            if (category == "Categories") {
+                                onCategoriesSeeAll()
+                            } else {
+                                println("See All clicked for: $category")
+                            }
+                        },
+                        onCategorySelected = onCategorySelected,
+                        onProductSelected = { product ->
+                            println("Product $product selected")
                         }
-                    },
-                    onCategorySelected = onCategorySelected,  // Pass ke function untuk navigate ke products
-                    onProductSelected = { product ->
-                        // Implementasi navigate ke product detail
-                        println("Product $product selected")
-                    }
-                )
+                    )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
             }
         }
     }

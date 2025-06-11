@@ -64,6 +64,8 @@ fun ProductScreens(
     onBack: () -> Unit = {}
 ) {
     var products by remember { mutableStateOf<List<Product>>(emptyList()) }
+    var filteredProducts by remember { mutableStateOf<List<Product>>(emptyList()) }
+    var searchQuery by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -86,6 +88,7 @@ fun ProductScreens(
             val response = apiService.getProducts("Bearer prakmobile")
             if (response.success) {
                 products = response.data
+                filteredProducts = products // Initialize filtered products with all products
             } else {
                 error = response.error ?: "Unknown error occurred"
             }
@@ -93,6 +96,18 @@ fun ProductScreens(
             error = e.message ?: "Failed to fetch products"
         } finally {
             isLoading = false
+        }
+    }
+
+    // Filter products based on search query
+    LaunchedEffect(searchQuery, products) {
+        filteredProducts = if (searchQuery.isEmpty()) {
+            products
+        } else {
+            products.filter { product ->
+                product.productName.contains(searchQuery, ignoreCase = true) ||
+                        product.description.contains(searchQuery, ignoreCase = true)
+            }
         }
     }
 
@@ -128,8 +143,7 @@ fun ProductScreens(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
-                    .clickable { },
+                    .weight(1f),
                 colors = CardDefaults.cardColors(
                     containerColor = Color.Gray.copy(alpha = 0.1f)
                 )
@@ -141,10 +155,25 @@ fun ProductScreens(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    JelloTextRegular(
-                        modifier = Modifier.weight(1f)
+                    TextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier
+                            .weight(1f)
+                            .background(Color.Transparent),
+                        placeholder = { Text("Search products...") },
+                        singleLine = true,
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        )
                     )
-                    JelloImageViewClick(
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
                         modifier = Modifier.padding(start = 8.dp)
                     )
                 }
@@ -197,7 +226,7 @@ fun ProductScreens(
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        items(products) { product ->
+                        items(filteredProducts) { product ->
                             ProductCard(
                                 product = product,
                                 onClick = { showDetail = product }
