@@ -71,6 +71,14 @@ fun ProductScreens(
     var showBottomSheet by remember { mutableStateOf(false) }
     var showDetail by remember { mutableStateOf<Product?>(null) }
     val sheetState = rememberModalBottomSheetState()
+    // Price range filter state
+    var minPrice by remember { mutableStateOf("") }
+    var maxPrice by remember { mutableStateOf("") }
+    var pendingMinPrice by remember { mutableStateOf("") }
+    var pendingMaxPrice by remember { mutableStateOf("") }
+    // Sort option state
+    var sortOption by remember { mutableStateOf("none") } // "none", "termurah", "termahal"
+    var pendingSortOption by remember { mutableStateOf(sortOption) }
 
     // Create Retrofit instance
     val retrofit = remember {
@@ -99,15 +107,21 @@ fun ProductScreens(
         }
     }
 
-    // Filter products based on search query
-    LaunchedEffect(searchQuery, products) {
-        filteredProducts = if (searchQuery.isEmpty()) {
-            products
-        } else {
-            products.filter { product ->
+    // Filter products based on search query and price range
+    LaunchedEffect(searchQuery, products, minPrice, maxPrice, sortOption) {
+        val filtered = products.filter { product ->
+            val matchesQuery = searchQuery.isEmpty() ||
                 product.productName.contains(searchQuery, ignoreCase = true) ||
-                        product.description.contains(searchQuery, ignoreCase = true)
-            }
+                product.description.contains(searchQuery, ignoreCase = true)
+            val min = minPrice.toIntOrNull() ?: Int.MIN_VALUE
+            val max = maxPrice.toIntOrNull() ?: Int.MAX_VALUE
+            val matchesPrice = product.price in min..max
+            matchesQuery && matchesPrice
+        }
+        filteredProducts = when (sortOption) {
+            "termurah" -> filtered.sortedBy { it.price }
+            "termahal" -> filtered.sortedByDescending { it.price }
+            else -> filtered
         }
     }
 
@@ -243,7 +257,20 @@ fun ProductScreens(
             onDismissRequest = { showBottomSheet = false },
             sheetState = sheetState,
         ) {
-            FilterSortBottomSheet(onApplyClick = { showBottomSheet = false })
+            FilterSortBottomSheet(
+                minPrice = pendingMinPrice,
+                maxPrice = pendingMaxPrice,
+                onMinPriceChange = { pendingMinPrice = it },
+                onMaxPriceChange = { pendingMaxPrice = it },
+                sortOption = pendingSortOption,
+                onSortOptionChange = { pendingSortOption = it },
+                onApplyClick = {
+                    minPrice = pendingMinPrice
+                    maxPrice = pendingMaxPrice
+                    sortOption = pendingSortOption
+                    showBottomSheet = false
+                }
+            )
         }
     }
 }
@@ -339,80 +366,80 @@ private fun formatPrice(price: Int): String {
 }
 
 @Composable
-fun FilterSortBottomSheet(onApplyClick: () -> Unit) {
+fun FilterSortBottomSheet(
+    minPrice: String,
+    maxPrice: String,
+    onMinPriceChange: (String) -> Unit,
+    onMaxPriceChange: (String) -> Unit,
+    sortOption: String,
+    onSortOptionChange: (String) -> Unit,
+    onApplyClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
         Text(
-            text = "SPECIAL OFFER",
+            text = "FILTER BY PRICE",
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
-        // Free Delivery checkbox
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { /* Handle click */ },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Free Delivery")
-            Checkbox(checked = true, onCheckedChange = { /* Handle change */ })
-        }
-        // Discount checkbox
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { /* Handle click */ },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Discount")
-            Checkbox(checked = false, onCheckedChange = { /* Handle change */ })
-        }
-        // Special Product checkbox
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { /* Handle click */ },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Special Product")
-            Checkbox(checked = false, onCheckedChange = { /* Handle change */ })
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "CHOOSE COLOR",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp) // Spacing between colors
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Example colors
-            ColorCircle(color = Color.LightGray, isSelected = true) // Selected color
-            ColorCircle(color = Color.Blue)
-            ColorCircle(color = Color.Cyan)
-            ColorCircle(color = Color.Magenta)
-            ColorCircle(color = Color.Green)
-            ColorCircle(color = Color.Yellow)
+            OutlinedTextField(
+                value = minPrice,
+                onValueChange = onMinPriceChange,
+                label = { Text("Min Price") },
+                modifier = Modifier.weight(1f),
+                singleLine = true
+            )
+            OutlinedTextField(
+                value = maxPrice,
+                onValueChange = onMaxPriceChange,
+                label = { Text("Max Price") },
+                modifier = Modifier.weight(1f),
+                singleLine = true
+            )
         }
-
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = "URUTKAN",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    selected = sortOption == "termurah",
+                    onClick = { onSortOptionChange("termurah") }
+                )
+                Text("Termurah")
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    selected = sortOption == "termahal",
+                    onClick = { onSortOptionChange("termahal") }
+                )
+                Text("Termahal")
+            }
+        }
         Spacer(modifier = Modifier.height(32.dp))
-
         Button(
             onClick = onApplyClick,
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray) // Light gray button
+            colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)
         ) {
-            Text("Apply Now", color = Color.Gray) // Gray text
+            Text("Apply Now", color = Color.Black)
         }
     }
 }

@@ -26,8 +26,6 @@ fun CartScreen(
     var cartItems by remember { mutableStateOf(
         listOf(
             CartItem("ULTRABOOST 20 SHOES", "Rp150.000", 1),
-            CartItem("ULTRABOOST 20 SHOES", "Rp175.000", 1),
-            CartItem("ULTRABOOST 20 SHOES", "Rp175.000", 1)
         )
     ) }
     var voucherCode by remember { mutableStateOf("") }
@@ -128,7 +126,7 @@ fun CartScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text("Sub total")
-                    Text("Rp475.000", fontWeight = FontWeight.Bold)
+                    Text("Rp170.000", fontWeight = FontWeight.Bold)
                 }
 
                 Row(

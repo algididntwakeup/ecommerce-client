@@ -86,7 +86,8 @@ fun HomeScreen(
     onCategoriesSeeAll: () -> Unit,
     onCategorySelected: (String) -> Unit,
     onNavigateToCart: () -> Unit = {},
-    onSearchClick: () -> Unit = {}
+    onSearchClick: () -> Unit = {},
+    onProductSelected: (String) -> Unit
 ) {
     var categories by remember { mutableStateOf<List<Category>>(emptyList()) }
     var allProducts by remember { mutableStateOf<List<Product>>(emptyList()) }
@@ -209,9 +210,9 @@ fun HomeScreen(
 
                 // Banner Slider
                 val sampleImages = listOf(
-                    painterResource(id = R.drawable.sample_slide1),
-                    painterResource(id = R.drawable.sample_slide1),
-                    painterResource(id = R.drawable.sample_slide1)
+                    painterResource(id = R.drawable.sample1),
+                    painterResource(id = R.drawable.sample2),
+                    painterResource(id = R.drawable.sample3)
                 )
 
                 BannerSliderUIBob(
@@ -265,9 +266,7 @@ fun HomeScreen(
                             }
                         },
                         onCategorySelected = onCategorySelected,
-                        onProductSelected = { product ->
-                            println("Product $product selected")
-                        }
+                        onProductSelected = onProductSelected
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
@@ -374,7 +373,7 @@ fun SubItemList(
                             }
                             ItemType.PRODUCT -> {
                                 // Untuk product, pass product ID untuk navigate ke product detail
-                                onProductSelected(item.name)
+                                onProductSelected(item.id)
                             }
                         }
                     },
@@ -422,7 +421,8 @@ fun HomeScreenPreview() {
         onCategoriesSeeAll = {},
         onCategorySelected = {},
         onNavigateToCart = {},
-        onSearchClick = {}
+        onSearchClick = {},
+        onProductSelected = {}
     )
 }
 

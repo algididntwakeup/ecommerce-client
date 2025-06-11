@@ -129,6 +129,9 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier) {
                 },
                 onSearchClick = {
                     navController.navigate("search")
+                },
+                onProductSelected = {
+                    navController.navigate("product/$it")
                 }
             )
         }
