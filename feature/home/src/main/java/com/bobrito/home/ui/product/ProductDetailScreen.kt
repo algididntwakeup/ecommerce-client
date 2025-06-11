@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,53 +15,72 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import com.bobrito.ui.components.BobImageViewProductDetail
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.TextButton
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import com.bobrito.home.ui.cart.CartScreen
 import com.bobrito.home.ui.checkout.CheckoutScreen
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.text.NumberFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetailScreen(
-    productName: String = "ULTRABOOST 20 SHOES NMD_R1",
-    productPrice: String = "Rp150.000",
-    productImage: String = "https://images.stockx.com/images/Nike-Air-Zoom-Elite-8-Turquoise-Jade-Volt.png?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color&updated_at=1627415295",
+    productName: String,
+    productPrice: String,
+    productImage: String?,
     rating: Int = 5,
     onBack: () -> Unit = {},
     onAddToCart: () -> Unit = {},
     onBuyNow: () -> Unit = {},
-    productDescription: String = "Sepatu running terbaru dengan teknologi boost, nyaman dipakai harian maupun olahraga. Upper knit, outsole karet anti slip, warna putih kombinasi biru.",
-    relatedProducts: List<Pair<String, String>> = listOf(
-        "NMD_R1 SHOES" to "Rp250.000",
-        "NMD_R1 SHOES" to "Rp375.000",
-        "NMD_R1 SHOES" to "Rp600.000"
-    )
+    productDescription: String,
 ) {
     var showOptionSheet by remember { mutableStateOf(false) }
     var optionType by remember { mutableStateOf("") } // "buy" or "cart"
     val sheetState = rememberModalBottomSheetState()
     var showDescriptionScreen by remember { mutableStateOf(false) }
     var currentScreen by remember { mutableStateOf("detail") } // "detail", "cart", "checkout"
+    var relatedProducts by remember { mutableStateOf<List<Product>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+
+    // Create Retrofit instance
+    val retrofit = remember {
+        Retrofit.Builder()
+            .baseUrl("https://ecommerce-gaiia-api.vercel.app/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    val apiService = remember { retrofit.create(ProductApiService::class.java) }
+
+    // Fetch related products when the screen is first displayed
+    LaunchedEffect(Unit) {
+        try {
+            val response = apiService.getProducts("Bearer prakmobile")
+            if (response.success) {
+                // Get 5 random products as related products
+                relatedProducts = response.data.shuffled().take(5)
+            }
+        } catch (e: Exception) {
+            // Handle error silently for related products
+        } finally {
+            isLoading = false
+        }
+    }
 
     when (currentScreen) {
         "detail" -> {
@@ -85,7 +104,7 @@ fun ProductDetailScreen(
                             verticalAlignment = Alignment.Top
                         ) {
                             Icon(
-                                imageVector = Icons.Default.ArrowBack,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back",
                                 modifier = Modifier
                                     .clickable { onBack() }
@@ -165,54 +184,58 @@ fun ProductDetailScreen(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 // Related Product
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "RELATED PRODUCT",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    )
-                    Text(
-                        text = "SEE ALL",
-                        color = Color(0xFFFF9800),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp
-                    )
-                }
-                LazyRow(
-                    modifier = Modifier.padding(vertical = 8.dp)
-                ) {
-                    items(relatedProducts) { (name, price) ->
-                        Card(
-                            modifier = Modifier
-                                .width(120.dp)
-                                .padding(horizontal = 4.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White)
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.padding(8.dp)
+                if (!isLoading && relatedProducts.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "RELATED PRODUCT",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = "SEE ALL",
+                            color = Color(0xFFFF9800),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp
+                        )
+                    }
+                    LazyRow(
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    ) {
+                        items(relatedProducts) { product ->
+                            Card(
+                                modifier = Modifier
+                                    .width(120.dp)
+                                    .padding(horizontal = 4.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color.White)
                             ) {
-                                BobImageViewProductDetail(
-                                    url = productImage,
-                                    description = "Related Product"
-                                )
-                                Text(
-                                    text = name,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(top = 4.dp)
-                                )
-                                Text(
-                                    text = price,
-                                    fontSize = 12.sp,
-                                    color = Color.Gray
-                                )
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.padding(8.dp)
+                                ) {
+                                    BobImageViewProductDetail(
+                                        url = product.imageUrl,
+                                        description = product.productName
+                                    )
+                                    Text(
+                                        text = product.productName,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.padding(top = 4.dp)
+                                    )
+                                    Text(
+                                        text = formatPrice(product.price),
+                                        fontSize = 12.sp,
+                                        color = Color.Gray
+                                    )
+                                }
                             }
                         }
                     }
@@ -255,7 +278,7 @@ fun ProductDetailScreen(
                     ProductOptionBottomSheet(
                         optionType = optionType,
                         onApplyClick = { showOptionSheet = false },
-                        onNavigateToCart = { 
+                        onNavigateToCart = {
                             showOptionSheet = false
                             currentScreen = "cart"
                         },
@@ -275,7 +298,7 @@ fun ProductDetailScreen(
         }
         "checkout" -> {
             CheckoutScreen(
-                onBack = { 
+                onBack = {
                     if (optionType == "cart") {
                         currentScreen = "cart"
                     } else {
@@ -286,6 +309,11 @@ fun ProductDetailScreen(
             )
         }
     }
+}
+
+private fun formatPrice(price: Int): String {
+    val format = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
+    return format.format(price.toDouble())
 }
 
 @Composable
@@ -389,7 +417,7 @@ fun ProductDescriptionScreen(description: String, onBack: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Default.ArrowBack,
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
                 modifier = Modifier
                     .clickable { onBack() }
@@ -408,14 +436,9 @@ fun ProductDescriptionScreen(description: String, onBack: () -> Unit) {
         ) {
             Text(
                 text = description,
+                textAlign = TextAlign.Justify,
                 style = MaterialTheme.typography.bodyMedium
             )
         }
     }
 }
-
-@Composable
-@Preview(showSystemUi = true)
-fun ProductDetailScreenPreview() {
-    ProductDetailScreen()
-} 
