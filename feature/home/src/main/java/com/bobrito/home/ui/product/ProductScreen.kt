@@ -31,6 +31,8 @@ import com.bobrito.ui.components.BobImageViewPhotoUrlRounded
 import coil.compose.AsyncImage
 import java.text.NumberFormat
 import java.util.Locale
+import com.bobrito.home.data.model.Product
+import com.bobrito.home.ui.components.*
 
 // Data classes for API response
 data class ProductResponse(
@@ -38,18 +40,6 @@ data class ProductResponse(
     val data: List<Product>,
     val message: String,
     val error: String?
-)
-
-data class Product(
-    val id: String,
-    val productName: String,
-    val description: String,
-    val price: Int,
-    val imageUrl: String,
-    val categoryId: String,
-    val brandId: String,
-    val createdAt: String,
-    val updatedAt: String
 )
 
 // API Service interface
@@ -111,13 +101,13 @@ private fun FilterSection(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Button(onClick = { showPriceRangeDialog = true }) {
-            Text(text = selectedPriceRange?.name ?: "Price Range")
+            Text(text = selectedPriceRange?.name?.replace("_", " ") ?: "Price Range")
         }
 
         Row {
             IconButton(onClick = { onSortOrderSelected(SortOrder.LOWEST_PRICE) }) {
                 Icon(
-                    imageVector = androidx.compose.material.icons.Icons.Default.ArrowUpward,
+                    imageVector = Icons.Default.ArrowUpward,
                     contentDescription = "Sort by lowest price",
                     tint = if (sortOrder == SortOrder.LOWEST_PRICE) 
                         MaterialTheme.colorScheme.primary 
@@ -127,7 +117,7 @@ private fun FilterSection(
             }
             IconButton(onClick = { onSortOrderSelected(SortOrder.HIGHEST_PRICE) }) {
                 Icon(
-                    imageVector = androidx.compose.material.icons.Icons.Default.ArrowDownward,
+                    imageVector = Icons.Default.ArrowDownward,
                     contentDescription = "Sort by highest price",
                     tint = if (sortOrder == SortOrder.HIGHEST_PRICE) 
                         MaterialTheme.colorScheme.primary 
@@ -160,7 +150,7 @@ private fun FilterSection(
                             Text(range.name.replace("_", " "))
                             if (range == selectedPriceRange) {
                                 Icon(
-                                    imageVector = androidx.compose.material.icons.Icons.Default.Check,
+                                    imageVector = Icons.Default.Check,
                                     contentDescription = "Selected"
                                 )
                             }

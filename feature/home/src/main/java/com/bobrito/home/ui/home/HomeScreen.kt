@@ -25,7 +25,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.bobrito.home.ui.categories.CategoryItem
+import com.bobrito.home.data.model.Category
 import com.bobrito.ui.R
 import com.bobrito.ui.components.*
 import com.bobrito.ui.theme.BiruPersib
@@ -84,196 +84,41 @@ interface ProductApiService {
 @Composable
 fun HomeScreen(
     onCategoriesSeeAll: () -> Unit,
-    onCategorySelected: (String) -> Unit,
-    onNavigateToCart: () -> Unit = {},
-    onSearchClick: () -> Unit = {}
+    onCategorySelected: (Category) -> Unit,
+    onNavigateToCart: () -> Unit,
+    onSearchClick: () -> Unit
 ) {
-    var categories by remember { mutableStateOf<List<Category>>(emptyList()) }
-    var allProducts by remember { mutableStateOf<List<Product>>(emptyList()) }
-    var newReleaseProducts by remember { mutableStateOf<List<Product>>(emptyList()) }
-    var popularProducts by remember { mutableStateOf<List<Product>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
-    var error by remember { mutableStateOf<String?>(null) }
+    Column {
+        TopBar(title = "Home")
 
-    // Create Retrofit instance
-    val retrofit = remember {
-        Retrofit.Builder()
-            .baseUrl("https://ecommerce-gaiia-api.vercel.app/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-
-    val categoryApiService = remember { retrofit.create(CategoryApiService::class.java) }
-    val productApiService = remember { retrofit.create(ProductApiService::class.java) }
-
-    // Fetch categories and products when the screen is first displayed
-    LaunchedEffect(Unit) {
-        try {
-            // Fetch categories
-            val categoryResponse = categoryApiService.getCategories("Bearer prakmobile")
-            if (categoryResponse.success) {
-                categories = categoryResponse.data
-            }
-
-            // Fetch products
-            val productResponse = productApiService.getProducts("Bearer prakmobile")
-            if (productResponse.success) {
-                allProducts = productResponse.data
-
-                // Shuffle products and take 7 for new release and popular
-                val shuffledProducts = allProducts.shuffled()
-                newReleaseProducts = shuffledProducts.take(7)
-                popularProducts = shuffledProducts.drop(7).take(7)
-            }
-        } catch (e: Exception) {
-            error = e.message ?: "Failed to fetch data"
-        } finally {
-            isLoading = false
-        }
-    }
-
-    val productItems = listOf(
-        ProductItem(
-            title = "Categories",
-            subItems = categories.map { CategoryItem(it.id, it.name, it.imageUrl) },
-            itemType = ItemType.CATEGORY
-        ),
-        ProductItem(
-            title = "New Release",
-            subItems = newReleaseProducts.map { CategoryItem(it.id, it.productName, it.imageUrl) },
-            itemType = ItemType.PRODUCT
-        ),
-        ProductItem(
-            title = "Popular Items",
-            subItems = popularProducts.map { CategoryItem(it.id, it.productName, it.imageUrl) },
-            itemType = ItemType.PRODUCT
+        SearchBar(
+            query = "",
+            onQueryChange = { /* Handle search */ }
         )
-    )
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BiruPersib)
-    ) {
-        item {
-            // Header Section dengan background colored
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(BiruPersib)
-                    .padding(bottom = 24.dp)
-            ) {
-                // Search Bar dan Shopping Cart
-                Row(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Card(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable(onClick = onSearchClick),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.White.copy(alpha = 0.2f)
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            BobImageViewClick(
-                                color = Color.White,
-                                imageVector = Icons.Outlined.Search,
-                                onClick = onSearchClick
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            BobTextRegular(
-                                text = "Cari barang kamu disini",
-                                color = Color.White
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    BobImageViewClick(
-                        color = Color.White,
-                        imageVector = Icons.Outlined.ShoppingCart,
-                        onClick = onNavigateToCart
-                    )
-                }
-
-                // Banner Slider
-                val sampleImages = listOf(
-                    painterResource(id = R.drawable.sample_slide1),
-                    painterResource(id = R.drawable.sample_slide1),
-                    painterResource(id = R.drawable.sample_slide1)
-                )
-
-                BannerSliderUIBob(
-                    bannerImages = sampleImages,
-                    onClick = { index ->
-                        // Handle banner click
-                        println("Banner $index clicked!")
-                    }
-                )
+        // Categories Section
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Categories",
+                style = MaterialTheme.typography.titleLarge
+            )
+            TextButton(onClick = onCategoriesSeeAll) {
+                Text("See All")
             }
         }
 
-        // Content Section dengan rounded corners
-        item {
-            if (isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            } else if (error != null) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = error ?: "Unknown error",
-                        color = Color.Red
-                    )
-                }
-            } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                        .background(Color.White)
-                        .padding(top = 24.dp)
-                ) {
-                    ItemProductHomeList(
-                        items = productItems,
-                        onSeeAllClick = { category ->
-                            if (category == "Categories") {
-                                onCategoriesSeeAll()
-                            } else {
-                                println("See All clicked for: $category")
-                            }
-                        },
-                        onCategorySelected = onCategorySelected,
-                        onProductSelected = { product ->
-                            println("Product $product selected")
-                        }
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
-            }
-        }
+        // Categories will be loaded from ViewModel
+        // For now showing empty state
+        Text(
+            text = "No categories available",
+            modifier = Modifier.padding(16.dp),
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 
