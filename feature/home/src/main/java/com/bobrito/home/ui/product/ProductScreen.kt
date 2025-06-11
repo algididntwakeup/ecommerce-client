@@ -1,55 +1,61 @@
 package com.bobrito.home.ui.product
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Gray
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.Star
-import com.bobrito.ui.components.BobImageViewPhotoUrlRounded
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.SheetState
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.foundation.border
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import com.bobrito.home.ui.product.ProductDetailScreen
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.bobrito.ui.components.BobImageViewPhotoUrlRounded
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Header
+import java.text.NumberFormat
+import java.util.Locale
+
+// Data classes for API response
+data class ProductResponse(
+    val success: Boolean,
+    val data: List<Product>,
+    val message: String,
+    val error: String?
+)
+
+data class Product(
+    val id: String,
+    val productName: String,
+    val description: String,
+    val price: Int,
+    val imageUrl: String,
+    val categoryId: String,
+    val brandId: String,
+    val createdAt: String,
+    val updatedAt: String
+)
+
+// API Service interface
+interface ProductApiService {
+    @GET("api/v1/products")
+    suspend fun getProducts(@Header("Authorization") token: String): ProductResponse
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,13 +63,46 @@ fun ProductScreens(
     category: String? = null,
     onBack: () -> Unit = {}
 ) {
-    val showBottomSheet = remember { mutableStateOf(false) }
+    var products by remember { mutableStateOf<List<Product>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var showDetail by remember { mutableStateOf<Product?>(null) }
     val sheetState = rememberModalBottomSheetState()
-    var showDetail by remember { mutableStateOf(false) }
 
-    if (showDetail) {
+    // Create Retrofit instance
+    val retrofit = remember {
+        Retrofit.Builder()
+            .baseUrl("https://ecommerce-gaiia-api.vercel.app/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    val apiService = remember { retrofit.create(ProductApiService::class.java) }
+
+    // Fetch products when the screen is first displayed
+    LaunchedEffect(Unit) {
+        try {
+            val response = apiService.getProducts("Bearer prakmobile")
+            if (response.success) {
+                products = response.data
+            } else {
+                error = response.error ?: "Unknown error occurred"
+            }
+        } catch (e: Exception) {
+            error = e.message ?: "Failed to fetch products"
+        } finally {
+            isLoading = false
+        }
+    }
+
+    if (showDetail != null) {
         ProductDetailScreen(
-            onBack = { showDetail = false }
+            productName = showDetail!!.productName,
+            productPrice = formatPrice(showDetail!!.price),
+            productImage = showDetail!!.imageUrl,
+            productDescription = showDetail!!.description,
+            onBack = { showDetail = null }
         )
         return
     }
@@ -130,31 +169,52 @@ fun ProductScreens(
                 Icon(
                     imageVector = Icons.Default.FilterList,
                     contentDescription = "Filter",
-                    modifier = Modifier.clickable { showBottomSheet.value = true }
+                    modifier = Modifier.clickable { showBottomSheet = true }
                 )
             }
         }
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(6) { // Display 6 dummy product cards
-                ProductCard(
-                    onClick = { showDetail = true }
-                )
+        Box(modifier = Modifier.fillMaxSize()) {
+            when {
+                isLoading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                error != null -> {
+                    Text(
+                        text = error ?: "Unknown error",
+                        color = Color.Red,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(16.dp)
+                    )
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(products) { product ->
+                            ProductCard(
+                                product = product,
+                                onClick = { showDetail = product }
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 
-    if (showBottomSheet.value) {
+    if (showBottomSheet) {
         ModalBottomSheet(
-            onDismissRequest = { showBottomSheet.value = false },
+            onDismissRequest = { showBottomSheet = false },
             sheetState = sheetState,
         ) {
-            FilterSortBottomSheet(onApplyClick = { showBottomSheet.value = false })
+            FilterSortBottomSheet(onApplyClick = { showBottomSheet = false })
         }
     }
 }
@@ -182,6 +242,7 @@ fun JelloImageViewClick(
 
 @Composable
 fun ProductCard(
+    product: Product,
     onClick: () -> Unit
 ) {
     Card(
@@ -201,10 +262,9 @@ fun ProductCard(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Image Placeholder, now using AsyncImage from Coil
             BobImageViewPhotoUrlRounded(
-                url = "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                description = "Product Image",
+                url = product.imageUrl,
+                description = product.productName,
                 modifier = Modifier
                     .weight(0.3f)
                     .padding(vertical = 40.dp)
@@ -215,12 +275,14 @@ fun ProductCard(
                     .padding(start = 12.dp)
             ) {
                 Text(
-                    text = "Iphone x 64 gb white limited edition...",
+                    text = product.productName,
                     style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(top = 0.dp)
                 )
                 Text(
-                    text = "Rp 11.000.000",
+                    text = formatPrice(product.price),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(top = 4.dp)
@@ -240,6 +302,11 @@ fun ProductCard(
             }
         }
     }
+}
+
+private fun formatPrice(price: Int): String {
+    val format = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
+    return format.format(price.toDouble())
 }
 
 @Composable
