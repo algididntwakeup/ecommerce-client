@@ -11,11 +11,6 @@ data class Customer(
     val updatedAt: String = ""
 )
 
-data class LoginRequest(
-    val email: String,
-    val password: String
-)
-
 data class CustomerResponse(
     val success: Boolean,
     val data: Customer?,
