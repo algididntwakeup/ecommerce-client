@@ -2,42 +2,36 @@ package com.bobrito.home.data.repository
 
 import android.util.Log
 import com.bobrito.home.data.model.Product
-import com.bobrito.home.data.service.ProductService
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import com.bobrito.home.data.model.ProductResponse
+import com.bobrito.home.data.remote.ProductApiService
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
 
-class ProductRepository {
-    private val service: ProductService
-
-    init {
-        val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+class ProductRepository @Inject constructor(
+    private val apiService: ProductApiService
+) {
+    fun getProducts(): Flow<List<Product>> = flow {
+        try {
+            val response = apiService.getProducts("Bearer prakmobile")
+            if (response.success) {
+                emit(response.data)
+            } else {
+                emit(emptyList())
+            }
+        } catch (e: Exception) {
+            emit(emptyList())
         }
-
-        val client = OkHttpClient.Builder()
-            .addInterceptor(logging)
-            .build()
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://ecommerce-gaiia-api.vercel.app/api/v1/")
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        service = retrofit.create(ProductService::class.java)
     }
 
-    suspend fun searchProducts(query: String): List<Product> {
-        return try {
-            Log.d("ProductRepository", "Searching for products with query: $query")
-            val response = service.searchProducts(query)
-            Log.d("ProductRepository", "Received ${response.data.size} products")
-            response.data
-        } catch (e: Exception) {
-            Log.e("ProductRepository", "Error searching products", e)
-            throw e
+    fun searchProducts(query: String, products: List<Product>): List<Product> {
+        return if (query.isEmpty()) {
+            products
+        } else {
+            products.filter { product ->
+                product.productName.contains(query, ignoreCase = true) ||
+                        product.description.contains(query, ignoreCase = true)
+            }
         }
     }
 }

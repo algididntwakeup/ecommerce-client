@@ -6,6 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -19,15 +21,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.bobrito.ui.components.BobImageViewPhotoUrlRounded
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.GET
-import retrofit2.http.Header
+import coil.compose.AsyncImage
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -59,191 +60,166 @@ interface ProductApiService {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductScreens(
-    category: String? = null,
-    onBack: () -> Unit = {}
+fun ProductScreen(
+    onProductClick: (Product) -> Unit,
+    viewModel: ProductViewModel = hiltViewModel()
 ) {
-    var products by remember { mutableStateOf<List<Product>>(emptyList()) }
-    var filteredProducts by remember { mutableStateOf<List<Product>>(emptyList()) }
-    var searchQuery by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(true) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var showBottomSheet by remember { mutableStateOf(false) }
-    var showDetail by remember { mutableStateOf<Product?>(null) }
-    val sheetState = rememberModalBottomSheetState()
+    val uiState by viewModel.uiState.collectAsState()
 
-    // Create Retrofit instance
-    val retrofit = remember {
-        Retrofit.Builder()
-            .baseUrl("https://ecommerce-gaiia-api.vercel.app/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-
-    val apiService = remember { retrofit.create(ProductApiService::class.java) }
-
-    // Fetch products when the screen is first displayed
-    LaunchedEffect(Unit) {
-        try {
-            val response = apiService.getProducts("Bearer prakmobile")
-            if (response.success) {
-                products = response.data
-                filteredProducts = products // Initialize filtered products with all products
-            } else {
-                error = response.error ?: "Unknown error occurred"
-            }
-        } catch (e: Exception) {
-            error = e.message ?: "Failed to fetch products"
-        } finally {
-            isLoading = false
-        }
-    }
-
-    // Filter products based on search query
-    LaunchedEffect(searchQuery, products) {
-        filteredProducts = if (searchQuery.isEmpty()) {
-            products
-        } else {
-            products.filter { product ->
-                product.productName.contains(searchQuery, ignoreCase = true) ||
-                        product.description.contains(searchQuery, ignoreCase = true)
-            }
-        }
-    }
-
-    if (showDetail != null) {
-        ProductDetailScreen(
-            productName = showDetail!!.productName,
-            productPrice = formatPrice(showDetail!!.price),
-            productImage = showDetail!!.imageUrl,
-            productDescription = showDetail!!.description,
-            onBack = { showDetail = null }
+    Column {
+        TopBar(title = "Products")
+        
+        SearchBar(
+            query = uiState.searchQuery,
+            onQueryChange = { viewModel.updateSearchQuery(it) }
         )
-        return
+
+        FilterSection(
+            selectedPriceRange = uiState.selectedPriceRange,
+            onPriceRangeSelected = { viewModel.updatePriceRange(it) },
+            sortOrder = uiState.sortOrder,
+            onSortOrderSelected = { viewModel.updateSortOrder(it) }
+        )
+
+        when {
+            uiState.isLoading -> LoadingSpinner()
+            uiState.error != null -> ErrorMessage(
+                message = uiState.error!!,
+                onRetry = { /* Implement retry */ }
+            )
+            else -> ProductGrid(
+                products = uiState.filteredProducts,
+                onProductClick = onProductClick
+            )
+        }
+    }
+}
+
+@Composable
+private fun FilterSection(
+    selectedPriceRange: PriceRange?,
+    onPriceRangeSelected: (PriceRange?) -> Unit,
+    sortOrder: SortOrder,
+    onSortOrderSelected: (SortOrder) -> Unit
+) {
+    var showPriceRangeDialog by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Button(onClick = { showPriceRangeDialog = true }) {
+            Text(text = selectedPriceRange?.name ?: "Price Range")
+        }
+
+        Row {
+            IconButton(onClick = { onSortOrderSelected(SortOrder.LOWEST_PRICE) }) {
+                Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Default.ArrowUpward,
+                    contentDescription = "Sort by lowest price",
+                    tint = if (sortOrder == SortOrder.LOWEST_PRICE) 
+                        MaterialTheme.colorScheme.primary 
+                    else 
+                        MaterialTheme.colorScheme.onSurface
+                )
+            }
+            IconButton(onClick = { onSortOrderSelected(SortOrder.HIGHEST_PRICE) }) {
+                Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Default.ArrowDownward,
+                    contentDescription = "Sort by highest price",
+                    tint = if (sortOrder == SortOrder.HIGHEST_PRICE) 
+                        MaterialTheme.colorScheme.primary 
+                    else 
+                        MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                modifier = Modifier
-                    .padding(end = 8.dp)
-                    .clickable { onBack() }
-            )
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.Gray.copy(alpha = 0.1f)
-                )
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        modifier = Modifier
-                            .weight(1f)
-                            .background(Color.Transparent),
-                        placeholder = { Text("Search products...") },
-                        singleLine = true,
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            disabledContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        )
-                    )
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
-            }
-        }
-
-        // Category or New Product header
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = category ?: "ALL PRODUCT",
-                style = MaterialTheme.typography.titleMedium
-            )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.FilterList,
-                    contentDescription = "Filter",
-                    modifier = Modifier.clickable { showBottomSheet = true }
-                )
-            }
-        }
-
-        Box(modifier = Modifier.fillMaxSize()) {
-            when {
-                isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-                error != null -> {
-                    Text(
-                        text = error ?: "Unknown error",
-                        color = Color.Red,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(16.dp)
-                    )
-                }
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        items(filteredProducts) { product ->
-                            ProductCard(
-                                product = product,
-                                onClick = { showDetail = product }
-                            )
+    if (showPriceRangeDialog) {
+        AlertDialog(
+            onDismissRequest = { showPriceRangeDialog = false },
+            title = { Text("Select Price Range") },
+            text = {
+                Column {
+                    PriceRange.values().forEach { range ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { 
+                                    onPriceRangeSelected(
+                                        if (range == selectedPriceRange) null else range
+                                    )
+                                    showPriceRangeDialog = false
+                                }
+                                .padding(vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(range.name.replace("_", " "))
+                            if (range == selectedPriceRange) {
+                                Icon(
+                                    imageVector = androidx.compose.material.icons.Icons.Default.Check,
+                                    contentDescription = "Selected"
+                                )
+                            }
                         }
                     }
                 }
-            }
+            },
+            confirmButton = { }
+        )
+    }
+}
+
+@Composable
+private fun ProductGrid(
+    products: List<Product>,
+    onProductClick: (Product) -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        contentPadding = PaddingValues(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(products) { product ->
+            ProductCard(product = product, onClick = { onProductClick(product) })
         }
     }
+}
 
-    if (showBottomSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showBottomSheet = false },
-            sheetState = sheetState,
-        ) {
-            FilterSortBottomSheet(onApplyClick = { showBottomSheet = false })
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ProductCard(
+    product: Product,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column {
+            AsyncImage(
+                model = product.imageUrl,
+                contentDescription = product.productName,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f),
+                contentScale = ContentScale.Crop
+            )
+            Column(
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(
+                    text = product.productName,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 2
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                PriceText(price = product.price)
+            }
         }
     }
 }
@@ -277,7 +253,7 @@ fun ProductCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
@@ -442,6 +418,6 @@ fun ColorCircle(color: Color, isSelected: Boolean = false) {
 @Composable
 fun ProductScreensPreview() {
     MaterialTheme {
-        ProductScreens()
+        ProductScreen()
     }
 }

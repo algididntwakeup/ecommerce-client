@@ -16,139 +16,152 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bobrito.ui.components.BobImageViewPhotoUrlRounded
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import com.bobrito.home.data.model.CartItem
+import com.bobrito.home.ui.components.*
+
+@Composable
+fun CartScreen(
+    onBackClick: () -> Unit,
+    viewModel: CartViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    Column {
+        TopBar(
+            title = "Shopping Cart",
+            onBackClick = onBackClick
+        )
+
+        when {
+            uiState.isLoading -> LoadingSpinner()
+            uiState.error != null -> ErrorMessage(
+                message = uiState.error!!,
+                onRetry = { /* Implement retry */ }
+            )
+            uiState.items.isEmpty() -> EmptyCart()
+            else -> CartContent(
+                items = uiState.items,
+                totalPrice = uiState.totalPrice,
+                onRemoveItem = viewModel::removeFromCart,
+                onUpdateQuantity = viewModel::updateQuantity
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptyCart() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Your cart is empty",
+            style = MaterialTheme.typography.titleLarge
+        )
+    }
+}
+
+@Composable
+private fun CartContent(
+    items: List<CartItem>,
+    totalPrice: Double,
+    onRemoveItem: (String) -> Unit,
+    onUpdateQuantity: (String, Int) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(items) { item ->
+                CartItemCard(
+                    item = item,
+                    onRemove = { onRemoveItem(item.id) },
+                    onUpdateQuantity = { quantity -> onUpdateQuantity(item.id, quantity) }
+                )
+            }
+        }
+
+        CartSummary(totalPrice = totalPrice)
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CartScreen(
-    onBack: () -> Unit,
-    onCheckout: () -> Unit
+private fun CartItemCard(
+    item: CartItem,
+    onRemove: () -> Unit,
+    onUpdateQuantity: (Int) -> Unit
 ) {
-    var cartItems by remember { mutableStateOf(
-        listOf(
-            CartItem("ULTRABOOST 20 SHOES", "Rp150.000", 1),
-            CartItem("ULTRABOOST 20 SHOES", "Rp175.000", 1),
-            CartItem("ULTRABOOST 20 SHOES", "Rp175.000", 1)
-        )
-    ) }
-    var voucherCode by remember { mutableStateOf("") }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
+    Card(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        // Top Bar
-        TopAppBar(
-            title = { Text("Cart") },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.White
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            AsyncImage(
+                model = item.imageUrl,
+                contentDescription = item.name,
+                modifier = Modifier
+                    .size(80.dp),
+                contentScale = ContentScale.Crop
             )
-        )
 
-        if (cartItems.isEmpty()) {
-            // Empty Cart State
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                modifier = Modifier.weight(1f)
             ) {
-                // You can replace this with your actual empty cart illustration
                 Text(
-                    "Cart is empty",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
+                    text = item.name,
+                    style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    "You haven't add any item yet",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(top = 8.dp)
+                    text = "Rp ${"%,.0f".format(item.price)}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary
                 )
-                Button(
-                    onClick = onBack,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 24.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF3D00))
-                ) {
-                    Text("Start Order")
-                }
-            }
-        } else {
-            // Cart Items List
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 16.dp)
-            ) {
-                items(cartItems) { item ->
-                    CartItemRow(
-                        item = item,
-                        onQuantityChange = { newQuantity ->
-                            cartItems = cartItems.map { 
-                                if (it == item) it.copy(quantity = newQuantity)
-                                else it
-                            }
-                        }
-                    )
-                }
-            }
 
-            // Bottom Section
-            Column(
-                modifier = Modifier
-                    .background(Color.White)
-                    .padding(16.dp)
-            ) {
-                // Voucher Input
-                OutlinedTextField(
-                    value = voucherCode,
-                    onValueChange = { voucherCode = it },
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Enter Code Voucher") },
-                    trailingIcon = {
-                        TextButton(onClick = { }) {
-                            Text("APPLY", color = Color(0xFFFF3D00))
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = { 
+                                if (item.quantity > 1) {
+                                    onUpdateQuantity(item.quantity - 1)
+                                }
+                            }
+                        ) {
+                            Text("-")
+                        }
+                        Text(
+                            text = item.quantity.toString(),
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                        IconButton(
+                            onClick = { onUpdateQuantity(item.quantity + 1) }
+                        ) {
+                            Text("+")
                         }
                     }
-                )
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Subtotal and Tax
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("Sub total")
-                    Text("Rp475.000", fontWeight = FontWeight.Bold)
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("Tax")
-                    Text("Rp20.000", fontWeight = FontWeight.Bold)
-                }
-
-                Button(
-                    onClick = onCheckout,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF3D00))
-                ) {
-                    Text("CHECKOUT")
+                    TextButton(onClick = onRemove) {
+                        Text("Remove")
+                    }
                 }
             }
         }
@@ -156,73 +169,37 @@ fun CartScreen(
 }
 
 @Composable
-private fun CartItemRow(
-    item: CartItem,
-    onQuantityChange: (Int) -> Unit
-) {
+private fun CartSummary(totalPrice: Double) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            .padding(16.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            // Product Image
-            BobImageViewPhotoUrlRounded(
-                url = "https://images.stockx.com/images/Nike-Air-Zoom-Elite-8-Turquoise-Jade-Volt.png",
-                description = "Product Image",
-                modifier = Modifier.size(80.dp)
-            )
-            
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 12.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = item.name,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp
+                    text = "Total",
+                    style = MaterialTheme.typography.titleLarge
                 )
                 Text(
-                    text = item.price,
-                    color = Color.Gray,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 4.dp)
+                    text = "Rp ${"%,.0f".format(totalPrice)}",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary
                 )
-                
-                // Quantity Controls
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    IconButton(
-                        onClick = { if (item.quantity > 1) onQuantityChange(item.quantity - 1) },
-                        modifier = Modifier
-                            .size(24.dp)
-                            .background(Color.LightGray, shape = MaterialTheme.shapes.small)
-                    ) {
-                        Text("-", fontSize = 16.sp)
-                    }
-                    Text(
-                        text = item.quantity.toString(),
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                    IconButton(
-                        onClick = { onQuantityChange(item.quantity + 1) },
-                        modifier = Modifier
-                            .size(24.dp)
-                            .background(Color.LightGray, shape = MaterialTheme.shapes.small)
-                    ) {
-                        Text("+", fontSize = 16.sp)
-                    }
-                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = { /* Implement checkout */ },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Proceed to Checkout")
             }
         }
     }
