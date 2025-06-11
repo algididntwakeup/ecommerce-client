@@ -1,6 +1,5 @@
 package com.bobrito.auth.ui.signup
 
-import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -20,8 +19,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bobrito.auth.MainActivity
-import com.bobrito.home.ui.HomeActivity
 import com.bobrito.ui.components.*
+import kotlinx.coroutines.launch
 
 @Composable
 fun SignupScreen(
@@ -30,6 +29,7 @@ fun SignupScreen(
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(viewModel.error) {
         viewModel.error?.let { error ->
@@ -162,8 +162,10 @@ fun SignupScreen(
                 onClick = {
                     viewModel.register {
                         // On successful registration
-                        context.startActivity(Intent(context, HomeActivity::class.java))
-                        (context as? MainActivity)?.finish()
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar("Account created successfully! Please login.")
+                            navController.navigateUp() // Navigate back to login screen
+                        }
                     }
                 }
             )
