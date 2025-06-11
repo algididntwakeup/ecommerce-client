@@ -1,5 +1,6 @@
 package com.bobrito.auth
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,25 +9,39 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.bobrito.auth.data.local.SessionManager
 import com.bobrito.auth.ui.signin.SigninScreen
+import com.bobrito.auth.ui.signin.SigninViewModel
 import com.bobrito.auth.ui.signup.SignupScreen
+import com.bobrito.home.ui.HomeActivity
 
 class MainActivity : ComponentActivity() {
 
-    sealed class  Screen(val route: String) {
+    sealed class Screen(val route: String) {
         object AuthSignin : Screen("auth/signin")
         object AuthSignup : Screen("auth/signup")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Check if user is already logged in
+        val sessionManager = SessionManager(this)
+        if (sessionManager.isLoggedIn()) {
+            startActivity(Intent(this, HomeActivity::class.java))
+            finish()
+            return
+        }
+
         enableEdgeToEdge()
         setContent {
             com.bobrito.ui.theme.ShoecommerceappTheme {
                 val navController = rememberNavController()
+                val signinViewModel: SigninViewModel = viewModel()
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NavHost(
@@ -36,7 +51,8 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable(Screen.AuthSignin.route) {
                             SigninScreen(
-                                navController = navController
+                                navController = navController,
+                                viewModel = signinViewModel
                             )
                         }
                         composable(Screen.AuthSignup.route) {
