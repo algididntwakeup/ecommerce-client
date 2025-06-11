@@ -46,6 +46,7 @@ data class CategoryResponse(
 data class Category(
     val id: String,
     val name: String,
+    val imageUrl: String,
     val createdAt: String,
     val updatedAt: String
 )
@@ -134,17 +135,17 @@ fun HomeScreen(
     val productItems = listOf(
         ProductItem(
             title = "Categories",
-            subItems = categories.map { CategoryItem(it.id, it.name) },
+            subItems = categories.map { CategoryItem(it.id, it.name, it.imageUrl) },
             itemType = ItemType.CATEGORY
         ),
         ProductItem(
             title = "New Release",
-            subItems = newReleaseProducts.map { CategoryItem(it.id, it.productName) },
+            subItems = newReleaseProducts.map { CategoryItem(it.id, it.productName, it.imageUrl) },
             itemType = ItemType.PRODUCT
         ),
         ProductItem(
             title = "Popular Items",
-            subItems = popularProducts.map { CategoryItem(it.id, it.productName) },
+            subItems = popularProducts.map { CategoryItem(it.id, it.productName, it.imageUrl) },
             itemType = ItemType.PRODUCT
         )
     )
