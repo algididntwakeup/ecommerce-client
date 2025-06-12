@@ -1,4 +1,4 @@
-package com.bobrito.auth.ui.signin
+package com.bobrito.home.auth.ui.signin
 
 import android.content.Intent
 import androidx.compose.foundation.background
@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.bobrito.auth.MainActivity
+import com.bobrito.home.auth.MainActivity
 import com.bobrito.home.ui.HomeActivity
 import com.bobrito.ui.components.*
 

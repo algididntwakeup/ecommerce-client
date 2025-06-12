@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.LocationOn
@@ -16,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.bobrito.home.ui.components.BobImageProfile
+import com.bobrito.home.auth.data.local.SessionManager
 
 import com.bobrito.home.ui.components.BobProfileMenuItem
 
@@ -27,7 +29,10 @@ fun ProfileScreen(
     onEditProfile: () -> Unit,
     onShippingAddress: () -> Unit,
     onWishlist: () -> Unit,
-    onOrderHistory: () -> Unit
+    onOrderHistory: () -> Unit,
+    onLogout: () -> Unit,
+    customer: com.bobrito.home.auth.data.model.Customer?,
+    onLoggedOut: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -47,10 +52,13 @@ fun ProfileScreen(
                 }
             },
             actions = {
-                IconButton(onClick = { /* Share profile */ }) {
+                IconButton(onClick = {
+                    onLogout()
+                    onLoggedOut()
+                }) {
                     Icon(
-                        Icons.Default.Edit,
-                        contentDescription = "Share",
+                        Icons.Default.ExitToApp,
+                        contentDescription = "Logout",
                         tint = Color.White
                     )
                 }
@@ -73,7 +81,7 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            BobImageProfile(name = "Admin")
+            BobImageProfile(name = customer?.name ?: "Admin")
         }
 
         // Menu Items

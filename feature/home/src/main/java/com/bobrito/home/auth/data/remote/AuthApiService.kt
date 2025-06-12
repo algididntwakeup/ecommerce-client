@@ -1,8 +1,8 @@
-package com.bobrito.auth.data.remote
+package com.bobrito.home.auth.data.remote
 
-import com.bobrito.auth.data.model.Customer
-import com.bobrito.auth.data.model.CustomerResponse
-import com.bobrito.auth.data.model.LoginRequest
+import com.bobrito.home.auth.data.model.Customer
+import com.bobrito.home.auth.data.model.CustomerResponse
+import com.bobrito.home.auth.data.model.LoginRequest
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header

@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation("androidx.compose.material:material:1.5.4")
     implementation("androidx.compose.material:material-icons-extended:1.6.7")
+    
     // Hilt Navigation Compose
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation("androidx.navigation:navigation-compose:2.7.6")

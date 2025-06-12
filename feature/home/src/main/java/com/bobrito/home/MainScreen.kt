@@ -22,6 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bobrito.home.ui.AccountScreens
 import com.bobrito.home.ui.BottomNavItem
 import com.bobrito.home.ui.OrderScreens
@@ -31,6 +32,7 @@ import com.bobrito.home.ui.home.HomeScreen
 import com.bobrito.home.ui.product.ProductScreens
 import com.bobrito.home.ui.profile.ProfileScreen
 import com.bobrito.home.ui.search.SearchScreen
+import com.bobrito.home.auth.ui.signin.SigninViewModel
 import com.bobrito.ui.theme.AbuMonyetGelap
 
 @Composable
@@ -149,12 +151,20 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier) {
         }
         composable(BottomNavItem.Order.route) { OrderScreens() }
         composable(BottomNavItem.Account.route) {
+            val viewModel: SigninViewModel = viewModel()
             ProfileScreen(
                 onBack = { /* Do nothing since this is a main tab */ },
                 onEditProfile = { navController.navigate("edit_profile") },
                 onShippingAddress = { navController.navigate("shipping_address") },
                 onWishlist = { navController.navigate("wishlist") },
-                onOrderHistory = { navController.navigate("order_history") }
+                onOrderHistory = { navController.navigate("order_history") },
+                onLogout = { viewModel.logout() },
+                customer = viewModel.customer,
+                onLoggedOut = {
+                    navController.navigate("login") {
+                        popUpTo(0)
+                    }
+                }
             )
         }
 

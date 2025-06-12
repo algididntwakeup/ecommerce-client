@@ -1,4 +1,4 @@
-package com.bobrito.auth
+package com.bobrito.home.auth
 
 import android.content.Intent
 import android.os.Bundle
@@ -13,10 +13,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.bobrito.auth.data.local.SessionManager
-import com.bobrito.auth.ui.signin.SigninScreen
-import com.bobrito.auth.ui.signin.SigninViewModel
-import com.bobrito.auth.ui.signup.SignupScreen
+import com.bobrito.home.auth.data.local.SessionManager
+import com.bobrito.home.auth.ui.signin.SigninScreen
+import com.bobrito.home.auth.ui.signin.SigninViewModel
+import com.bobrito.home.auth.ui.signup.SignupScreen
 import com.bobrito.home.ui.HomeActivity
 
 class MainActivity : ComponentActivity() {

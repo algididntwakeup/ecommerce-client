@@ -1,12 +1,12 @@
-package com.bobrito.auth.ui.signup
+package com.bobrito.home.auth.ui.signup
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.bobrito.auth.data.model.Customer
-import com.bobrito.auth.data.repository.AuthRepository
+import com.bobrito.home.auth.data.model.Customer
+import com.bobrito.home.auth.data.repository.AuthRepository
 import kotlinx.coroutines.launch
 import java.util.UUID
 

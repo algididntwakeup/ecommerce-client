@@ -1,8 +1,8 @@
-package com.bobrito.auth.data.local
+package com.bobrito.home.auth.data.local
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.bobrito.auth.data.model.Customer
+import com.bobrito.home.auth.data.model.Customer
 import com.google.gson.Gson
 
 class SessionManager(context: Context) {

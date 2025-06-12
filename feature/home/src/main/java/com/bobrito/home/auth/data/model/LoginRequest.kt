@@ -1,4 +1,4 @@
-package com.bobrito.auth.data.model
+package com.bobrito.home.auth.data.model
 
 data class LoginRequest(
     val email: String,

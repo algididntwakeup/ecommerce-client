@@ -1,4 +1,4 @@
-package com.bobrito.auth.ui.signin
+package com.bobrito.home.auth.ui.signin
 
 import android.app.Application
 import androidx.compose.runtime.getValue
@@ -6,10 +6,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.bobrito.auth.data.local.SessionManager
-import com.bobrito.auth.data.model.Customer
-import com.bobrito.auth.data.model.LoginRequest
-import com.bobrito.auth.data.repository.AuthRepository
+import com.bobrito.home.auth.data.local.SessionManager
+import com.bobrito.home.auth.data.model.Customer
+import com.bobrito.home.auth.data.model.LoginRequest
+import com.bobrito.home.auth.data.repository.AuthRepository
 import kotlinx.coroutines.launch
 
 class SigninViewModel(application: Application) : AndroidViewModel(application) {

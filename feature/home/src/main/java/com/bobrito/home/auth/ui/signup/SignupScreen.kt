@@ -1,4 +1,4 @@
-package com.bobrito.auth.ui.signup
+package com.bobrito.home.auth.ui.signup
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.bobrito.auth.MainActivity
+import com.bobrito.home.auth.MainActivity
 import com.bobrito.ui.components.*
 import kotlinx.coroutines.launch
 

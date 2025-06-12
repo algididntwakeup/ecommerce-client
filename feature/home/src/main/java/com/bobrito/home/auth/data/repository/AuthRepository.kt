@@ -1,9 +1,9 @@
-package com.bobrito.auth.data.repository
+package com.bobrito.home.auth.data.repository
 
-import com.bobrito.auth.data.model.Customer
-import com.bobrito.auth.data.model.CustomerResponse
-import com.bobrito.auth.data.model.LoginRequest
-import com.bobrito.auth.data.remote.AuthApiService
+import com.bobrito.home.auth.data.model.Customer
+import com.bobrito.home.auth.data.model.CustomerResponse
+import com.bobrito.home.auth.data.model.LoginRequest
+import com.bobrito.home.auth.data.remote.AuthApiService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
