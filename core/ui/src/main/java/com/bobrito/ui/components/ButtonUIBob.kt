@@ -20,19 +20,22 @@ import com.bobrito.ui.theme.OrenGoogle
 @Composable
 fun BobButtonPrimary(
     text: String = "Login Now",
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    enabled: Boolean = true
 ) {
     BobBaseButton(
         text = text,
         onClick = onClick,
-        enabled = true,
+        enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
             .height(56.dp),
         color = ButtonDefaults.buttonColors(
             containerColor = LightOrange,
-            contentColor = AbuMonyetGelap
+            contentColor = AbuMonyetGelap,
+            disabledContainerColor = LightOrange.copy(alpha = 0.5f),
+            disabledContentColor = AbuMonyetGelap.copy(alpha = 0.5f)
         )
     )
 }
@@ -62,7 +65,6 @@ fun BobButtonFacebook(
 
 @Composable
 fun BobButtonGoogle(
-
     text: String = "Google",
     onClick: () -> Unit = {},
     modifier : Modifier = Modifier
@@ -95,7 +97,6 @@ fun BobButtonSocmedRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-
         BobButtonGoogle(
             modifier = Modifier
                 .height(56.dp)
@@ -112,7 +113,7 @@ fun BobButtonSocmedRow(
     }
 }
 
-// Kompilasi Preview
+// Previews
 @Preview()
 @Composable
 fun BobButtonPrimaryPreview() {

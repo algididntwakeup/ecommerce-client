@@ -21,19 +21,22 @@ import com.bobrito.ui.theme.VeryLightGrey
 
 @Composable
 fun BobEditText(
-    value: String = "Email",
-    onTyping: (String) -> Unit = {},
+    value: String = "",
+    onValueChange: (String) -> Unit = {},
+    enabled: Boolean = true,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
-){
+) {
     BasicTextField(
         value = value,
-        onValueChange ={ onTyping.invoke(it)},
-        modifier = Modifier.fillMaxWidth()
+        onValueChange = onValueChange,
+        enabled = enabled,
+        modifier = Modifier
+            .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .border(width = 1.dp, color = VeryLightGrey, shape = RoundedCornerShape(8.dp))
             .background(Color.White)
-            .padding(8.dp),
+            .padding(16.dp),
         textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
         visualTransformation = visualTransformation,
         keyboardOptions = keyboardOptions
@@ -42,12 +45,12 @@ fun BobEditText(
 
 @Preview
 @Composable
-fun BobEditTextPreview(){
+fun BobEditTextPreview() {
     BobEditText()
 }
 
 @Preview
 @Composable
-fun BobEditTextPasswordPreview(){
+fun BobEditTextPasswordPreview() {
     BobEditText(visualTransformation = PasswordVisualTransformation())
 }

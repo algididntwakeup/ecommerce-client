@@ -21,7 +21,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "shoecommerceapp"
 include(":app")
-include(":feature:auth")
 include(":core:ui")
 include(":feature:home")
 include(":core:navigator")

@@ -2,14 +2,7 @@ package com.bobrito.home.ui.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -17,11 +10,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,24 +25,147 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.bobrito.home.ui.categories.CategoryItem
 import com.bobrito.ui.R
-import com.bobrito.ui.components.BannerSliderUIBob
-import com.bobrito.ui.components.BobImageViewClick
-import com.bobrito.ui.components.BobImageViewPhotoUrlRounded
-import com.bobrito.ui.components.BobTextRegular
+import com.bobrito.ui.components.*
 import com.bobrito.ui.theme.BiruPersib
 import com.bobrito.ui.theme.Purple40
 import com.bobrito.ui.theme.VividMagenta
+<<<<<<< HEAD
 import com.bobrito.ui.theme.birudongker
 import com.bobrito.ui.theme.oranye
 
+=======
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Header
+
+// Data classes for API responses
+data class CategoryResponse(
+    val success: Boolean,
+    val data: List<Category>,
+    val message: String,
+    val error: String?
+)
+
+data class Category(
+    val id: String,
+    val name: String,
+    val imageUrl: String,
+    val createdAt: String,
+    val updatedAt: String
+)
+
+data class ProductResponse(
+    val success: Boolean,
+    val data: List<Product>,
+    val message: String,
+    val error: String?
+)
+
+data class Product(
+    val id: String,
+    val productName: String,
+    val description: String,
+    val price: Int,
+    val imageUrl: String,
+    val categoryId: String,
+    val brandId: String,
+    val createdAt: String,
+    val updatedAt: String
+)
+
+// API Service interfaces
+interface CategoryApiService {
+    @GET("api/v1/categories")
+    suspend fun getCategories(@Header("Authorization") token: String): CategoryResponse
+}
+
+interface ProductApiService {
+    @GET("api/v1/products")
+    suspend fun getProducts(@Header("Authorization") token: String): ProductResponse
+}
+>>>>>>> feature-search
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onCategoriesSeeAll: () -> Unit,
+    onCategorySelected: (String) -> Unit,
+    onNavigateToCart: () -> Unit = {},
+    onSearchClick: () -> Unit = {},
+    onProductSelected: (String) -> Unit
+) {
+    var categories by remember { mutableStateOf<List<Category>>(emptyList()) }
+    var allProducts by remember { mutableStateOf<List<Product>>(emptyList()) }
+    var newReleaseProducts by remember { mutableStateOf<List<Product>>(emptyList()) }
+    var popularProducts by remember { mutableStateOf<List<Product>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    // Create Retrofit instance
+    val retrofit = remember {
+        Retrofit.Builder()
+            .baseUrl("https://ecommerce-gaiia-api.vercel.app/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    val categoryApiService = remember { retrofit.create(CategoryApiService::class.java) }
+    val productApiService = remember { retrofit.create(ProductApiService::class.java) }
+
+    // Fetch categories and products when the screen is first displayed
+    LaunchedEffect(Unit) {
+        try {
+            // Fetch categories
+            val categoryResponse = categoryApiService.getCategories("Bearer prakmobile")
+            if (categoryResponse.success) {
+                categories = categoryResponse.data
+            }
+
+            // Fetch products
+            val productResponse = productApiService.getProducts("Bearer prakmobile")
+            if (productResponse.success) {
+                allProducts = productResponse.data
+
+                // Shuffle products and take 7 for new release and popular
+                val shuffledProducts = allProducts.shuffled()
+                newReleaseProducts = shuffledProducts.take(7)
+                popularProducts = shuffledProducts.drop(7).take(7)
+            }
+        } catch (e: Exception) {
+            error = e.message ?: "Failed to fetch data"
+        } finally {
+            isLoading = false
+        }
+    }
+
+    val productItems = listOf(
+        ProductItem(
+            title = "Categories",
+            subItems = categories.map { CategoryItem(it.id, it.name, it.imageUrl) },
+            itemType = ItemType.CATEGORY
+        ),
+        ProductItem(
+            title = "New Release",
+            subItems = newReleaseProducts.map { CategoryItem(it.id, it.productName, it.imageUrl) },
+            itemType = ItemType.PRODUCT
+        ),
+        ProductItem(
+            title = "Popular Items",
+            subItems = popularProducts.map { CategoryItem(it.id, it.productName, it.imageUrl) },
+            itemType = ItemType.PRODUCT
+        )
+    )
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
+<<<<<<< HEAD
             .background(birudongker) // Background biru dulu
+=======
+            .background(BiruPersib)
+>>>>>>> feature-search
     ) {
         item {
             // Header Section dengan background colored
@@ -72,9 +185,7 @@ fun HomeScreen() {
                     Card(
                         modifier = Modifier
                             .weight(1f)
-                            .clickable {
-                                // Handle search click
-                            },
+                            .clickable(onClick = onSearchClick),
                         colors = CardDefaults.cardColors(
                             containerColor = Color.White.copy(alpha = 0.2f)
                         ),
@@ -89,9 +200,7 @@ fun HomeScreen() {
                             BobImageViewClick(
                                 color = Color.White,
                                 imageVector = Icons.Outlined.Search,
-                                onClick = {
-                                    // Handle search icon click
-                                }
+                                onClick = onSearchClick
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             BobTextRegular(
@@ -106,17 +215,21 @@ fun HomeScreen() {
                     BobImageViewClick(
                         color = Color.White,
                         imageVector = Icons.Outlined.ShoppingCart,
-                        onClick = {
-                            // Handle cart click
-                        }
+                        onClick = onNavigateToCart
                     )
                 }
 
                 // Banner Slider
                 val sampleImages = listOf(
+<<<<<<< HEAD
                     painterResource(id = R.drawable.pap1),
                     painterResource(id = R.drawable.pap2),
                     painterResource(id = R.drawable.pap3),
+=======
+                    painterResource(id = R.drawable.sample1),
+                    painterResource(id = R.drawable.sample2),
+                    painterResource(id = R.drawable.sample3)
+>>>>>>> feature-search
                 )
 
                 BannerSliderUIBob(
@@ -129,69 +242,75 @@ fun HomeScreen() {
             }
         }
 
-        // Content Section dengan rounded corners - INI YANG PENTING!
+        // Content Section dengan rounded corners
         item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)) // Clip di sini
-                    .background(Color.White) // Background putih setelah clip
-                    .padding(top = 24.dp) // Padding setelah background
-            ) {
-                val productItems = listOf(
-                    ProductItem(
-                        "Categories",
-                        listOf(
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg "
-                        )
-                    ),
-                    ProductItem(
-                        "New Release",
-                        listOf(
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg "
-                        )
-                    ),
-                    ProductItem(
-                        "Popular Items",
-                        listOf(
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg",
-                            "https://pbs.twimg.com/profile_images/964099345086689280/wekXLWht_400x400.jpg "
-                        )
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (error != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = error ?: "Unknown error",
+                        color = Color.Red
                     )
-                )
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                        .background(Color.White)
+                        .padding(top = 24.dp)
+                ) {
+                    ItemProductHomeList(
+                        items = productItems,
+                        onSeeAllClick = { category ->
+                            if (category == "Categories") {
+                                onCategoriesSeeAll()
+                            } else {
+                                println("See All clicked for: $category")
+                            }
+                        },
+                        onCategorySelected = onCategorySelected,
+                        onProductSelected = onProductSelected
+                    )
 
-                ItemProductHomeList(
-                    items = productItems,
-                    onSeeAllClick = { category ->
-                        println("See All clicked for: $category")
-                    }
-                )
-
-                // Tambah padding bottom biar gak kepotong
-                Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
             }
         }
     }
 }
 
+// Enum untuk membedakan tipe item
+enum class ItemType {
+    CATEGORY,
+    PRODUCT
+}
 
 data class ProductItem(
     val title: String,
-    val subItems: List<String> = emptyList()
+    val subItems: List<CategoryItem> = emptyList(),
+    val itemType: ItemType = ItemType.PRODUCT  // Default adalah product
 )
 
 @Composable
 fun ItemProductHomeList(
     items: List<ProductItem>,
-    onSeeAllClick: (String) -> Unit = {}
+    onSeeAllClick: (String) -> Unit = {},
+    onCategorySelected: (String) -> Unit = {},  // Untuk category click
+    onProductSelected: (String) -> Unit = {}    // Untuk product click
 ) {
     Column(
         modifier = Modifier.padding(horizontal = 16.dp)
@@ -205,7 +324,6 @@ fun ItemProductHomeList(
                 horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Bold, elegant typography sesuai guidelines
                 Text(
                     text = item.title,
                     style = MaterialTheme.typography.headlineSmall.copy(
@@ -215,7 +333,6 @@ fun ItemProductHomeList(
                     color = Color.Black
                 )
 
-                // See All dengan styled text
                 val annotatedString = buildAnnotatedString {
                     withStyle(
                         style = SpanStyle(
@@ -238,16 +355,25 @@ fun ItemProductHomeList(
             }
 
             // Product Items Row
-            SubItemList(subItems = item.subItems)
+            SubItemList(
+                subItems = item.subItems,
+                itemType = item.itemType,
+                onCategorySelected = onCategorySelected,
+                onProductSelected = onProductSelected
+            )
 
-            // Spacer between sections - lots of whitespace sesuai guidelines
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
 
 @Composable
-fun SubItemList(subItems: List<String>) {
+fun SubItemList(
+    subItems: List<CategoryItem>,
+    itemType: ItemType,
+    onCategorySelected: (String) -> Unit = {},
+    onProductSelected: (String) -> Unit = {}
+) {
     LazyRow(
         horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)
     ) {
@@ -257,15 +383,25 @@ fun SubItemList(subItems: List<String>) {
                     .width(140.dp)
                     .height(160.dp)
                     .clickable {
-                        // Handle item click
+                        // Berbeda handling berdasarkan tipe item
+                        when (itemType) {
+                            ItemType.CATEGORY -> {
+                                // Untuk category, pass category ID untuk navigate ke products by category
+                                onCategorySelected(item.name)
+                            }
+                            ItemType.PRODUCT -> {
+                                // Untuk product, pass product ID untuk navigate ke product detail
+                                onProductSelected(item.id)
+                            }
+                        }
                     },
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White
                 ),
                 elevation = CardDefaults.cardElevation(
-                    defaultElevation = 2.dp // Subtle shadows sesuai guidelines
+                    defaultElevation = 2.dp
                 ),
-                shape = RoundedCornerShape(12.dp) // Consistent rounded corners
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Column(
                     modifier = Modifier
@@ -274,17 +410,16 @@ fun SubItemList(subItems: List<String>) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     BobImageViewPhotoUrlRounded(
-                        url = item,
-                        description = "Product image",
+                        url = item.imageUrl,
+                        description = item.name,
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Product name placeholder
                     Text(
-                        text = "Product Name",
+                        text = item.name,
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontWeight = FontWeight.Medium
                         ),
@@ -297,18 +432,31 @@ fun SubItemList(subItems: List<String>) {
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true, device = Devices.PIXEL_5)
+@Preview
 @Composable
-fun HomeScreensPreview() {
-    HomeScreen()
+fun HomeScreenPreview() {
+    HomeScreen(
+        onCategoriesSeeAll = {},
+        onCategorySelected = {},
+        onNavigateToCart = {},
+        onSearchClick = {},
+        onProductSelected = {}
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 fun SubItemListPreview() {
     val temp = listOf(
-        "https://picsum.photos/200/200?random=1",
-        "https://picsum.photos/200/200?random=2"
+        CategoryItem("1", "Sneakers"),
+        CategoryItem("2", "Boots")
     )
+<<<<<<< HEAD
     SubItemList(temp)
+=======
+    SubItemList(
+        subItems = temp,
+        itemType = ItemType.CATEGORY
+    )
+>>>>>>> feature-search
 }

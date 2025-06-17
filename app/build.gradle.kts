@@ -50,10 +50,13 @@ android {
 dependencies {
 
     //module
+<<<<<<< HEAD
     implementation(project(":core:navigator"))
 
 
     implementation(project(":feature:auth"))
+=======
+>>>>>>> feature-search
     implementation(project(":feature:home"))
 
 //    dagger hilt belah sini bre
